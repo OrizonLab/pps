@@ -7,6 +7,10 @@ priorité envisagée :
 - **V2** : 6 à 12 mois après le lancement
 - **V3** : vision long terme, nécessite partenariats ou certifications
 
+Le périmètre exact du MVP est fixé par la
+[décision 0004](decisions/0004-perimetre-mvp.md) et la
+[feuille de route](07-feuille-de-route.md), qui font référence.
+
 ---
 
 ## Pilier A — Une interface « zéro apprentissage »
@@ -19,10 +23,10 @@ par le canal qu'il connaît déjà.
 | Canal | Pour qui | Idée | Priorité |
 |---|---|---|---|
 | **Téléphone fixe ou mobile classique** | Ceux qui refusent tout écran | L'IA appelle à heure fixe (« le coup de fil du matin »), et le senior peut appeler un numéro unique pour parler à son compagnon. Aucun équipement à installer. | **MVP** |
-| **Tablette simplifiée** | Niveaux 2 à 4 | Un lanceur qui transforme une tablette Android ou un iPad : grandes tuiles, photos des proches, un geste = un appel. Livrée préconfigurée, prête à l'emploi. | **MVP** |
+| **Tablette simplifiée** | Niveaux 2 à 4 | Un lanceur qui transforme une tablette Android ou un iPad : grandes tuiles, photos des proches, un geste = un appel. Livrée préconfigurée, prête à l'emploi. | V2 |
 | **Voix** | Tous | On parle à PPS comme à une personne, avec un français naturel, tolérant aux hésitations, aux accents et aux répétitions. | **MVP** |
 | **Télévision** | Ceux qui passent du temps devant la télé | Application TV (Android TV, clé HDMI) : photos de la famille en fond d'écran, visio sur grand écran, rappels discrets. | V2 |
-| **Papier** | Ceux qui aiment le courrier | **La Gazette PPS** : un journal familial imprimé et posté chaque mois, avec photos et messages. Le senior peut répondre par téléphone, sa réponse est transcrite et envoyée à la famille. | **MVP** (gazette) / V2 (réponse) |
+| **Papier** | Ceux qui aiment le courrier | **La Gazette PPS** : un journal familial imprimé et posté chaque mois, avec photos et messages. Le senior peut répondre par téléphone, sa réponse est transcrite et envoyée à la famille. | V2 |
 | **Objet dédié** | Niveaux 3 et 4 | Cadre photo connecté ou « radio » avec un gros bouton unique pour appeler, en partenariat avec un fabricant. | V3 |
 | **Montre ou pendentif** | Risque de chute | Détection de chute et bouton SOS, via des partenaires de téléassistance. | V2 |
 
@@ -37,9 +41,10 @@ par le canal qu'il connaît déjà.
 - **Multilingue et traduction en direct** : un grand-père qui parle portugais,
   arabe, italien ou vietnamien peut échanger avec des petits-enfants qui ne
   parlent que français.
-- **Pas de mot de passe** pour le senior : appareil appairé par la famille,
-  reconnaissance du visage ou de la voix. Toute la configuration se fait
-  à distance par un proche.
+- **Pas de mot de passe** pour le senior : appareil appairé par la famille
+  et verrouillage natif du système, **sans biométrie** (le visage et la voix
+  sont des données sensibles, et une voix peut être clonée). Toute la
+  configuration se fait à distance par un proche.
 - **Bouton « Aide »** omniprésent : il connecte à un proche disponible ou,
   à défaut, à un conseiller PPS.
 
@@ -56,8 +61,9 @@ par le canal qu'il connaît déjà.
   bleu… »). **MVP**
 - **Réagir sans taper** : « Dis-leur que c'est magnifique » est transcrit et
   envoyé. **MVP**
-- **Visio en un geste**, avec décroché automatique optionnel (et consenti)
-  pour les personnes qui ne peuvent plus répondre seules. **MVP**
+- **Visio en un geste**, avec décroché automatique optionnel pour les
+  personnes qui ne peuvent plus répondre seules (consentement, voyant
+  visible, liste fermée de contacts, validation du comité éthique). V2
 - **Présence ambiante** : un écran « fenêtre » ouvert sur la cuisine de sa
   fille quelques heures par jour, sans appel formel, juste pour se sentir
   ensemble. Opt-in des deux côtés. V3
@@ -70,7 +76,7 @@ par le canal qu'il connaît déjà.
 - **Rotation douce entre frères et sœurs**, pour que la charge ne repose pas
   toujours sur la même personne. V2
 - **Rituels familiaux** : l'appel du dimanche, le « mot du jour » des
-  petits-enfants, les anniversaires et fêtes rappelés à toute la famille. **MVP**
+  petits-enfants, les anniversaires et fêtes rappelés à toute la famille. V2
 
 ### B3. Le senior contributeur : transmettre
 
@@ -100,7 +106,8 @@ par le canal qu'il connaît déjà.
 
 - **Scan de l'ordonnance** (photo) : l'IA lit l'ordonnance et propose un
   planning de prises, **validé obligatoirement par un humain** (proche,
-  pharmacien ou infirmière) avant activation. **MVP**
+  pharmacien ou infirmière) avant activation. V2. Au MVP, le planning est
+  saisi manuellement par un proche, puis validé de la même façon.
 - **Rappels intelligents et multicanaux** : notification, voix, appel sur le
   fixe. « Avez-vous pris votre comprimé rose du midi ? » **MVP**
 - **Escalade graduée** si la prise n'est pas confirmée : nouveau rappel, puis
@@ -127,9 +134,10 @@ par le canal qu'il connaît déjà.
 ### C3. Le carnet de santé partagé
 
 - Traitements, allergies, antécédents, contacts médicaux, personne de
-  confiance, directives anticipées. **MVP**
+  confiance, directives anticipées. V2
 - **Fiche urgence** accessible aux secours (QR code sur le frigo ou dans le
-  portefeuille). **MVP**
+  portefeuille) : contenu minimal choisi par le senior, consentie,
+  révocable, chaque consultation journalisée. V2
 - **Interopérabilité avec Mon Espace Santé** et les standards de santé
   (HL7 FHIR) à terme. V3
 
@@ -157,10 +165,13 @@ par le canal qu'il connaît déjà.
 
 - **Le « Bonjour » quotidien** : chaque matin, le senior répond « ça va » à
   l'IA, ou appuie sur un bouton. Sans signe de vie à l'heure habituelle, une
-  cascade se déclenche : rappel, appel de l'IA, voisin, famille, puis
-  plateforme de téléassistance 24h/24 partenaire. **MVP**
-- **Bouton SOS** dans l'appli, sur un objet, ou à la voix (« Au secours »).
-  **MVP**
+  cascade se déclenche : nouvel appel, puis les proches autorisés, dans
+  l'ordre choisi par le senior. **MVP**. Le relais vers une plateforme de
+  téléassistance 24h/24 partenaire arrive en V2 : pendant le pilote, **PPS
+  n'est ni un service de téléassistance ni un service d'urgence**, et le dit
+  clairement aux familles.
+- **Bouton SOS** dans l'appli, sur un objet, ou à la voix (« Au secours »),
+  relié à une plateforme de téléassistance partenaire. V2
 - **Bouclier anti-arnaque** : V2
   - « Montre-moi ce SMS » : l'IA analyse un message ou un courrier suspect.
   - Alerte sur les scénarios connus : faux conseiller bancaire, faux livreur,
@@ -186,8 +197,10 @@ par le canal qu'il connaît déjà.
 
 - **Tableau de bord aidant** : l'état de la semaine en un coup d'œil, ce qui a
   été fait, les prochains RDV, les alertes. **MVP**
-- **Le résumé du dimanche** : un message rédigé par l'IA pour toute la
-  famille. « Mamie a bien pris ses traitements, elle a parlé de son genou deux
+- **Le résumé du dimanche** : un résumé pour les proches autorisés,
+  consultable dans l'espace famille (la notification ne contient aucune
+  donnée de santé). Au MVP, il est construit par des règles simples, sans
+  IA ; la rédaction par l'IA vient ensuite. « Mamie a bien pris ses traitements, elle a parlé de son genou deux
   fois, elle a adoré les photos de Léa. RDV chez le cardiologue jeudi :
   qui l'accompagne ? » **MVP**
 - **Répartition des tâches** entre frères et sœurs, voisins, amis : courses,
@@ -220,7 +233,7 @@ douceur**, alors que beaucoup ont déjà du mal avec le numérique « d'avant »
 
 - **Le compagnon numérique** : « Comment j'envoie une photo ? », « C'est quoi
   ce message ? » L'IA répond à la voix, pas à pas, avec une patience infinie
-  et sans jamais juger. **MVP**
+  et sans jamais juger. V2
 - **Prise en main à distance** : « Je vois ce que tu vois. » Un proche ou un
   conseiller PPS voit l'écran du senior et peut le guider ou agir à sa place
   (avec son accord à chaque session). V2

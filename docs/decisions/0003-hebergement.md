@@ -7,23 +7,34 @@
 
 Le porteur envisage Hostinger. La loi impose un hébergeur **certifié HDS**
 pour stocker des données de santé pour le compte de tiers (Code de la santé
-publique, article L.1111-8), dans l'Union européenne depuis le
-26 septembre 2026. Aucune certification HDS n'a été trouvée pour Hostinger.
+publique, article L.1111-8), et, depuis le 26 septembre 2026, un hébergement
+exclusivement dans l'Union européenne ou l'Espace économique européen.
+Aucune certification HDS n'a été trouvée pour Hostinger.
 
 ## Décision proposée
 
 - **Hostinger** pour ce qui ne contient **aucune donnée de santé réelle** :
-  environnement de démonstration, préproduction avec données fictives, site
-  vitrine.
-- **Production** (dès le premier pilote avec de vraies familles) chez un
-  hébergeur **certifié HDS** en France, à choisir avant la fin du MVP.
-- Tout est conteneurisé (Docker) : changer d'hébergeur n'a pas d'impact sur
-  le code.
+  développement, préproduction et démonstrations avec des données fictives,
+  site vitrine.
+- **Production** (dès la première donnée réelle d'un senior, même d'une
+  famille amie) : une **offre managée chez un hébergeur certifié HDS en
+  France**, dont le certificat couvre l'exécution des conteneurs,
+  PostgreSQL et les sauvegardes (par exemple Clever Cloud, Scaleway ou
+  OVHcloud, à vérifier offre par offre).
+- Si PPS administrait elle-même des machines virtuelles et la base, elle
+  exercerait des activités du référentiel HDS (administration, sauvegarde) :
+  il faudrait une certification propre ou un infogérant certifié. Ce point
+  est à faire valider par un juriste.
+- **Sous-traitants** (modèles d'IA, reconnaissance et synthèse vocales,
+  téléphonie, SMS) : un service ne reçoit des données de santé que si son
+  offre est couverte par un certificat HDS et que le traitement reste dans
+  l'EEE.
+- Tout est conteneurisé : changer d'hébergeur n'a pas d'impact sur le code.
 
 ## Conséquences
 
-- Aucune donnée réelle de senior ne doit être saisie sur un environnement
-  Hostinger.
-- La décision devient bloquante avant le premier pilote avec de vraies
-  familles. Si Hostinger obtient ou démontre une certification HDS, cette
-  décision sera revue.
+- Aucune donnée réelle de senior sur un environnement Hostinger.
+- Le choix de l'hébergeur HDS devient bloquant avant le premier pilote. Il
+  faut le faire deux à trois mois avant (contrat, analyse d'impact,
+  délégué à la protection des données, sous-traitants), au plus tard
+  pendant l'incrément 6.

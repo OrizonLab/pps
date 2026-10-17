@@ -56,10 +56,11 @@ temps à **brider** l'agent qu'à l'utiliser.
 
 ### Où Hermes Agent peut quand même servir
 
-- **Prototype de la phase 0** : simuler en quelques jours un « compagnon »
-  sur WhatsApp ou Telegram avec quelques familles volontaires, pour tester le
-  ton, les questions et le résumé quotidien, **sans données de santé
-  réelles**.
+- **Maquette interne** : simuler en quelques jours un « compagnon » avec des
+  **personas fictifs joués par l'équipe**, pour travailler le ton, les
+  questions et le résumé quotidien. **Jamais avec de vraies familles** : même
+  un check-in sans réponse est une donnée de santé, et Hermes Agent passe par
+  des fournisseurs d'IA et des messageries non maîtrisés.
 - **Outil interne de l'équipe** : veille, support, automatisations internes.
 - **Source d'inspiration** : sa gestion de la mémoire et son format de skills
   (standard ouvert agentskills.io) sont de bonnes idées à reprendre, en
@@ -67,8 +68,8 @@ temps à **brider** l'agent qu'à l'utiliser.
 
 ## L'architecture recommandée : deux étages
 
-L'idée clé : **séparer ce qui doit être infaillible de ce qui doit être
-intelligent**.
+L'idée clé : **séparer ce qui doit être fiable et prévisible de ce qui doit
+être intelligent**.
 
 ```mermaid
 flowchart TB
@@ -79,8 +80,8 @@ flowchart TB
         COMP <--> ORCH <--> AG
     end
 
-    subgraph E1["Étage 1 : le moteur de soin (sans IA, infaillible)"]
-        WF["Workflows durables<br/>rappels, check-in, escalades"]
+    subgraph E1["Étage 1 : le moteur de soin (sans IA, fiable et supervisé)"]
+        WF["Tâches planifiées durables<br/>rappels, check-in, escalades"]
         CONS["Consentements et droits<br/>qui voit quoi"]
         AUD["Journal d'audit"]
         DATA[("Données chiffrées<br/>hébergement HDS")]
@@ -95,10 +96,16 @@ flowchart TB
 
 - **Rappels, check-in quotidien, cascades d'alerte, consentements** : tout cela
   est géré par du code classique, testé, déterministe.
-- Basé sur un moteur de **workflows durables** (par exemple Temporal) : un
-  rappel prévu à 8h00 part à 8h00, même si un serveur redémarre.
-- **Si l'IA tombe en panne**, l'étage 1 continue : le rappel part par SMS ou
-  par un appel avec message enregistré.
+- Basé sur une **file de tâches planifiées durable dans PostgreSQL** (voir la
+  [décision 0005](decisions/0005-planification-durable.md)) : un rappel est
+  enregistré dans la même transaction que la validation du planning, et il
+  est repris automatiquement si un serveur redémarre.
+- **Si l'IA tombe en panne**, l'étage 1 continue : appel avec message
+  enregistré et réponse par les touches du téléphone, ou SMS.
+- **Fiable ne veut pas dire infaillible** : un opérateur téléphonique en
+  panne, un téléphone éteint ou un réseau coupé restent possibles. Le système
+  est donc **redondant et supervisé** (alerte à l'équipe si une tâche est en
+  retard), et PPS ne se présente jamais comme un service d'urgence.
 - C'est cet étage qui détient **la vérité** : le planning des médicaments
   validé, les droits de chaque proche, l'historique.
 
@@ -125,7 +132,7 @@ Le code de PPS est écrit en **Rust**, déployé avec **Docker**, sur une base *
 |---|---|---|
 | **Voix temps réel et téléphonie** | Serveur LiveKit et sa passerelle SIP (open source), avec notre **agent vocal en Rust** construit sur le SDK Rust de LiveKit | Framework Python LiveKit Agents, uniquement pour un prototype jetable en phase 0 |
 | **Opérateur téléphonique** | Opérateur SIP avec numéros français | — |
-| **Workflows durables** | Temporal, avec son **SDK Rust** (stable depuis septembre 2026) et un stockage PostgreSQL | Restate (écrit en Rust), ou une file de tâches PostgreSQL maison pour un tout premier prototype |
+| **Tâches planifiées durables** | **File de tâches PostgreSQL** en Rust (`FOR UPDATE SKIP LOCKED`, bail, idempotence) derrière un trait | Temporal (SDK Rust stable depuis septembre 2026) ou Restate, si les besoins dépassent la file de tâches |
 | **Orchestrateur d'agents** | **Code Rust maison**, léger, avec rmcp (SDK officiel Rust de MCP) pour les outils | — |
 | **Modèle de langage** | Un modèle de premier plan accessible depuis une **région européenne** | Plusieurs fournisseurs, pour ne pas dépendre d'un seul |
 | **Reconnaissance et synthèse vocales** | Services spécialisés, choisis après un **banc d'essai sur des voix de seniors** | — |
@@ -135,13 +142,18 @@ Le code de PPS est écrit en **Rust**, déployé avec **Docker**, sur une base *
 Les données de santé imposent de maîtriser **où** les données sont traitées.
 Depuis septembre 2026, l'hébergement des données de santé doit se faire
 **exclusivement dans l'UE ou l'EEE** (voir le
-[document 10](10-suivi-sante-a-distance.md)) : le modèle doit donc être
-appelé depuis une région européenne.
+[document 10](10-suivi-sante-a-distance.md)). Être dans une « région
+européenne » ne suffit pas : **le service précis** (modèle d'IA,
+reconnaissance vocale, synthèse vocale) doit figurer dans le périmètre d'un
+certificat HDS, et le traitement doit rester dans l'EEE. À défaut, ce service
+ne reçoit **aucune donnée de santé**. Ces conditions sont à faire valider par
+le juriste avant le pilote.
 
 - **Claude (Anthropic)** est disponible dans des régions européennes via
   Amazon Bedrock et Google Cloud Vertex AI. Ces deux clouds ont des régions en
-  France certifiées HDS. La disponibilité exacte des modèles par région est
-  à vérifier au moment du choix.
+  France certifiées HDS ; il faut vérifier que le service d'IA lui-même entre
+  dans le périmètre du certificat, et la disponibilité des modèles par
+  région.
 - **Mistral AI** (français) est une alternative souveraine, utilisable en
   Europe et en partie auto-hébergeable.
 - **Modèles open source auto-hébergés** (dont la famille Hermes de Nous

@@ -96,7 +96,8 @@ dehors du règlement européen sur les dispositifs médicaux.
 En revanche, **« tension au-dessus de 16, prévenez votre fille »**, c'est une
 surveillance de paramètres physiologiques. Le logiciel devient alors très
 probablement un **dispositif médical** (classe IIa ou plus), avec marquage
-CE, organisme notifié et, à partir d'août 2028, les obligations des IA « à
+CE, organisme notifié et, à partir d'août 2028 (date reportée par le
+règlement « Digital Omnibus », à confirmer), les obligations des IA « à
 haut risque ».
 
 Pour le MVP, on s'en tient donc à des alertes **non médicales** :
@@ -139,7 +140,8 @@ ces professionnels sont tenus au **secret professionnel**.
   du senior**.
 - **Exception** : en cas de diagnostic ou de pronostic grave, la famille, les
   proches ou la personne de confiance peuvent recevoir les informations
-  nécessaires pour soutenir le patient, sauf s'il s'y oppose.
+  nécessaires pour soutenir le patient, sauf s'il s'y oppose. C'est le
+  **médecin** qui délivre ces informations, pas PPS.
 
 ### Comment PPS l'organise : deux espaces
 
@@ -179,8 +181,8 @@ pour l'exploitant du dispositif.
 
 ### Ce que PPS peut faire
 
-**PPS n'est pas une société médicale : elle ne peut pas être opérateur de
-télésurveillance.** En revanche, elle peut :
+**PPS n'a pas vocation à être opérateur de télésurveillance** (il faudrait
+employer un médecin et se déclarer auprès de l'ARS). En revanche, elle peut :
 
 - **s'associer à des plateformes de télésurveillance certifiées**, quand le
   médecin du senior en prescrit une ;

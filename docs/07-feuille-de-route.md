@@ -41,7 +41,14 @@ famille + soin » qui nous distingue.
   différents), 10 professionnels (aides à domicile, infirmières, médecins,
   CCAS).
 - **Test « magicien d'Oz »** : l'appel du matin réalisé par un humain qui suit
-  un script, pour valider l'usage et le prix avant de coder.
+  un script, pour valider l'usage et le prix avant de coder. Avec le
+  consentement éclairé des participants, un minimum de données, et aucune
+  donnée de santé saisie dans un outil non conforme (tableur partagé,
+  messagerie grand public).
+- **Banc d'essai de la reconnaissance vocale** : collecte de voix âgées
+  enregistrées avec consentement, en qualité téléphonique, pour comparer les
+  moteurs de reconnaissance avant de construire l'agent vocal (voir la
+  [décision 0013](decisions/0013-voix-temps-reel.md)).
 - **Prototype cliquable** de l'appli famille et du résumé quotidien.
 - **Cadrage juridique** : données de santé, hébergement certifié, statut
   « services à la personne », règlement européen sur l'IA.
@@ -49,18 +56,29 @@ famille + soin » qui nous distingue.
 
 ### Phase 1 — MVP (mois 3 à 6)
 
-- Appel du matin par l'IA (fixe et mobile), avec check-in et cascade d'alerte.
-- Rappels de médicaments et de rendez-vous, avec scan d'ordonnance validé par
-  un humain.
-- Appli famille : fil de messages et photos, agenda partagé, tableau de bord,
-  résumé du dimanche.
-- Gazette papier mensuelle.
-- Compagnon numérique de base (questions sur le téléphone, la tablette).
-- **Pilote avec 50 familles**, suivi de près.
+Le périmètre est fixé par la [décision 0004](decisions/0004-perimetre-mvp.md) :
+familles en direct (B2C), téléphone habituel du senior, espace famille web,
+niveaux d'accompagnement 2 et 3, seniors capables de consentir seuls.
+
+- Appel du matin sur le fixe ou le mobile : d'abord **scripté** (voix de
+  synthèse, réponses par oui/non ou par les touches), puis **conversationnel**
+  avec l'IA.
+- Check-in quotidien et cascade d'alerte **limitée aux proches autorisés** :
+  pendant le pilote, PPS n'est ni un service de téléassistance ni un service
+  d'urgence, et le dit clairement.
+- Rappels de médicaments et de rendez-vous, avec un planning **saisi par un
+  proche et validé** par un humain habilité.
+- Espace famille web (installable sur le téléphone) : messages et photos lus
+  au senior pendant l'appel, agenda partagé, tableau de bord « Comment
+  va-t-il ? », résumé hebdomadaire.
+- **Pilote avec 50 familles**, suivi de près, **uniquement chez un hébergeur
+  certifié HDS**.
 
 ### Phase 2 — Élargissement (mois 6 à 12)
 
-- Tablette simplifiée préconfigurée (en location).
+- Tablette simplifiée préconfigurée (en location), visio.
+- Lecture de l'ordonnance par photo, résumé rédigé par l'IA, gazette papier.
+- Compagnon numérique (questions sur le téléphone, la tablette).
 - Bouclier anti-arnaque et copilote administratif (courriers).
 - Biographe IA et livre de vie.
 - Académie numérique : parcours, bac à sable, prise en main à distance.
@@ -78,6 +96,33 @@ famille + soin » qui nous distingue.
 - Annuaire et services locaux, vie sociale.
 - Ouverture à d'autres pays européens.
 
+## Les premiers incréments de code
+
+Chaque incrément est une PR relue puis fusionnée (voir `CLAUDE.md`). L'ordre
+vise une boucle démontrable « appel du matin + rappels + résumé famille »
+sans jamais exposer d'API non authentifiée.
+
+1. **Socle** : workspace Rust, images Docker durcies, CI (tests, lints,
+   dépendances, analyse des images), point de santé.
+2. **Cercle de soin, consentements, journal d'audit** : modèle métier, rôles
+   de base de données, Row-Level Security. Aucune route métier exposée.
+3. **Authentification** : lien magique, sessions, protection CSRF, accès à la
+   base limité au cercle de l'utilisateur, premières pages (créer un cercle,
+   inviter un proche).
+4. **Chiffrement applicatif** des données sensibles.
+5. **Planning de médicaments** : proposition, validation humaine, planning
+   validé, avec saisie manuelle.
+6. **Planificateur** et calcul des occurrences (fuseau du senior, changements
+   d'heure) : premiers rappels réels.
+7. **Appel du matin scripté** : check-in, rappels du jour, recueil de
+   l'accord seul à seul, cascade d'alerte vers les proches autorisés.
+8. **« Comment va-t-il ? »** : tableau de bord, messages de la famille lus
+   pendant l'appel, résumé construit sans IA.
+
+Ensuite : clés d'accès (passkeys), agent vocal conversationnel, résumé par
+l'IA, lecture d'ordonnance, gestion des clés avec OpenBao, déploiement chez
+l'hébergeur HDS.
+
 ## Les indicateurs de réussite
 
 **Indicateur principal (« North Star »)** : le nombre de **contacts humains
@@ -94,6 +139,10 @@ messages échangés avec la famille et les proches).
 | **Business** | Conversion après essai, rétention à 3, 6 et 12 mois, satisfaction (seniors et familles) |
 
 ## Les questions ouvertes à trancher ensemble
+
+Les questions 1 à 3 ont désormais une réponse par défaut dans la
+[décision 0004](decisions/0004-perimetre-mvp.md), à confirmer par le
+porteur du projet.
 
 1. **Qui est le premier client ?** Les familles en direct (B2C), ou un
    partenaire qui distribue (mutuelle, caisse de retraite, département) ?

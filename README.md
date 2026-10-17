@@ -49,8 +49,11 @@ Tout le reste vient enrichir ce service. Détails dans la
 
 ## Statut
 
-Phase de réflexion et de cadrage. Aucun code pour l'instant.
+Cadrage terminé, développement du MVP en cours, par incréments relus puis
+fusionnés (voir la [feuille de route](docs/07-feuille-de-route.md)).
 
 Choix techniques arrêtés : **Rust** pour tout le code serveur et le cœur des
 applications, **Docker** pour le déploiement, **PostgreSQL** pour la base de
-données.
+données. Toutes les décisions sont consignées dans le
+[journal des décisions](docs/decisions/README.md), et les règles
+d'ingénierie dans [`CLAUDE.md`](CLAUDE.md).

@@ -1,6 +1,6 @@
 # 6. Architecture technique : Rust, Docker, PostgreSQL
 
-> Le principe des **deux étages** (un moteur de soin sans IA, infaillible,
+> Le principe des **deux étages** (un moteur de soin sans IA, fiable et supervisé,
 > et des agents IA qui proposent sans jamais décider seuls) est détaillé dans
 > le [document 8](08-faisabilite-et-choix-ia.md). Ce document décrit
 > comment le construire.
@@ -13,10 +13,11 @@
 | **Déploiement** | **Docker** : chaque service dans son conteneur, images minimales et durcies | Environnements identiques du poste du développeur à la production, isolation des services, déploiement reproductible chez un hébergeur HDS |
 | **Base de données** | **PostgreSQL** | Robuste, éprouvé dans la santé, et ses extensions couvrent tous nos besoins (voir plus bas) : c'est le meilleur choix pour PPS |
 
-**Règle générale** : tout **notre** code est en Rust. Les composants
-d'infrastructure éprouvés, écrits dans d'autres langages (PostgreSQL en C,
-LiveKit et Temporal en Go), sont utilisés tels quels, chacun dans son
-conteneur isolé.
+**Règle générale** : tout notre code serveur et le cœur des applications
+sont en Rust. Les interfaces mobiles (V2) seront en Flutter, sans logique
+métier. Les composants d'infrastructure éprouvés, écrits dans d'autres
+langages (PostgreSQL en C, LiveKit en Go), sont utilisés tels quels, chacun
+dans son conteneur isolé.
 
 ## Pourquoi Rust est un bon choix pour PPS
 
@@ -42,7 +43,7 @@ conteneur isolé.
 ### Exemple : « l'IA propose, l'humain valide », garanti par le compilateur
 
 ```rust
-use chrono::{DateTime, Utc};
+use jiff::Timestamp;
 
 /// Planning de traitement proposé (lu sur une ordonnance par l'IA,
 /// ou saisi par un proche). Il ne peut déclencher aucun rappel.
@@ -51,13 +52,14 @@ pub struct PlanningPropose {
     pub source: SourcePlanning,
 }
 
-/// Preuve qu'un humain habilité a validé le planning.
-/// Ses champs sont privés : seul le module d'authentification
-/// peut en fabriquer une, jamais un agent IA.
+/// Preuve qu'un humain habilité, récemment authentifié, a validé
+/// **ce** planning précis (son empreinte). Ses champs sont privés :
+/// seul le module d'authentification peut en fabriquer une, jamais un agent IA.
 pub struct ValidationHumaine {
     valide_par: IdUtilisateur,
     role: RoleValidation, // organisateur, pharmacien, infirmière
-    horodatage: DateTime<Utc>,
+    empreinte_planning: Empreinte,
+    horodatage: Timestamp,
 }
 
 /// Planning validé : le seul type accepté par le moteur de rappels.
@@ -67,8 +69,13 @@ pub struct PlanningValide {
 }
 
 impl PlanningPropose {
-    pub fn valider(self, validation: ValidationHumaine) -> PlanningValide {
-        PlanningValide { prises: self.prises, validation }
+    /// Refuse une validation donnée pour un autre planning
+    /// (ou pour une version modifiée depuis).
+    pub fn valider(self, validation: ValidationHumaine) -> Result<PlanningValide, ErreurSoin> {
+        if validation.empreinte_planning != self.empreinte() {
+            return Err(ErreurSoin::ValidationNonConcordante);
+        }
+        Ok(PlanningValide { prises: self.prises, validation })
     }
 }
 
@@ -89,8 +96,11 @@ pub fn programmer_rappels(planning: &PlanningValide) -> Result<(), ErreurSoin> {
 | Temps de compilation | Cache de compilation (cargo-chef dans Docker, sccache en intégration continue) |
 
 **Règles de codage :** `unsafe` interdit dans notre code
-(`#![forbid(unsafe_code)]`), Clippy en mode strict, et audit des dépendances
-à chaque modification (voir la section Docker).
+(`unsafe_code = "forbid"`), Clippy en mode strict, et audit des dépendances
+à chaque modification (voir la section Docker). Seule exception prévue : le
+crate de liaison avec les applications mobiles (V2), dont le code `unsafe`
+est généré par l'outil de liaison ; il sera isolé, en `deny` plutôt qu'en
+`forbid`, avec revue obligatoire.
 
 ## PostgreSQL : est-ce le meilleur choix ? Oui
 
@@ -104,12 +114,12 @@ sauvegarde, une seule chose à certifier.
 | Besoin | Réponse de PostgreSQL |
 |---|---|
 | Cercles familiaux, rôles, consentements, plannings | Cœur relationnel, transactions ACID, contraintes d'intégrité |
-| Isolation stricte entre familles | **Row-Level Security** : même en cas de bug applicatif, une requête ne peut pas lire les données d'un autre cercle |
+| Isolation stricte entre familles | **Row-Level Security** activée et forcée sur chaque table, avec le cercle fixé par transaction : un `WHERE` oublié ne suffit plus à exposer les données d'un autre cercle (voir la [décision 0007](decisions/0007-isolation-multi-familles.md)) |
 | Journal d'audit (qui a vu quoi) | Table en ajout seul, chaînée par empreintes pour détecter toute altération, plus l'extension **pgAudit** |
 | Mesures de santé dans le temps | Partitionnement natif par mois (TimescaleDB en option si les volumes l'exigent) |
 | Mémoire de l'IA (recherche par le sens) | Extension **pgvector** |
 | Recherche dans les notes et les courriers | Recherche plein texte avec configuration française |
-| Événements et tâches | Modèle « outbox » et `LISTEN/NOTIFY` ; PostgreSQL sert aussi de stockage au serveur Temporal |
+| Tâches planifiées et événements | File de tâches (`FOR UPDATE SKIP LOCKED`, bail, idempotence), modèle « outbox » et `LISTEN/NOTIFY` (voir la [décision 0005](decisions/0005-planification-durable.md)) |
 | Données les plus sensibles | **Chiffrement applicatif** en Rust avant écriture (chiffrement d'enveloppe), clés gérées dans OpenBao ou le KMS de l'hébergeur |
 
 ### Les alternatives écartées
@@ -135,7 +145,8 @@ sauvegarde, une seule chose à certifier.
 
 **PostgreSQL 18** aujourd'hui (dernière version stable).
 PostgreSQL 19 est en phase de version candidate, avec une sortie prévue le
-19 novembre 2026 : on migrera après sa première version corrective.
+19 novembre 2026 ([annonce officielle](https://www.postgresql.org/about/news/postgresql-19-rc-1-released-3409/)) :
+on migrera après sa première version corrective.
 
 ## Vue d'ensemble
 
@@ -148,10 +159,9 @@ flowchart LR
         TEL["Téléphone<br/>fixe ou mobile"]
     end
 
-    subgraph Docker["Conteneurs Docker (hébergement HDS, UE)"]
+    subgraph Docker["Conteneurs Docker (hébergement HDS en France)"]
         API["pps-api<br/>Rust, Axum"]
         SOIN["pps-soin<br/>moteur de soin, Rust"]
-        TMP["Temporal<br/>(serveur)"]
         AGT["pps-agents<br/>orchestrateur IA, Rust"]
         VOIX["pps-voix<br/>agent vocal, Rust"]
         LK["LiveKit + SIP<br/>(média, téléphonie)"]
@@ -161,7 +171,7 @@ flowchart LR
         BAO["OpenBao<br/>(secrets, clés)"]
     end
 
-    subgraph Externes["Services externes (UE)"]
+    subgraph Externes["Sous-traitants (certifiés HDS, EEE)"]
         LLM["Modèles d'IA<br/>région UE"]
         STT["Reconnaissance et<br/>synthèse vocales"]
         OP["Opérateur SIP<br/>numéros français"]
@@ -174,8 +184,6 @@ flowchart LR
     TAB <-.-> LK
     FAM <-.-> LK
     API --> SOIN
-    SOIN <--> TMP
-    TMP --- PG
     SOIN --- PG
     API --- PG
     API --- S3
@@ -199,7 +207,7 @@ nettes :
 | `pps-db` | Accès à PostgreSQL (SQLx, requêtes vérifiées à la compilation), migrations |
 | `pps-crypto` | Chiffrement applicatif, gestion des clés via OpenBao |
 | `pps-api` | API HTTP pour les applications et le portail (Axum), authentification, contrôle des droits |
-| `pps-soin` | Étage 1 : rappels, check-in, cascades d'alerte, consentements, sous forme de workflows Temporal |
+| `pps-soin` | Étage 1 : rappels, check-in, cascades d'alerte, consentements, avec la file de tâches planifiées PostgreSQL |
 | `pps-agents` | Étage 2 : orchestrateur et agents IA, outils exposés en MCP, interface commune aux fournisseurs de modèles |
 | `pps-voix` | Agent vocal : appels téléphoniques et conversation temps réel |
 | `pps-notif` | SMS, notifications push, e-mails, génération de la gazette papier |
@@ -213,8 +221,10 @@ nettes :
 | API HTTP | Axum | Mature, maintenu par l'équipe de Tokio |
 | PostgreSQL | SQLx | Requêtes SQL vérifiées à la compilation, pas d'injection SQL possible avec les requêtes paramétrées |
 | TLS | rustls | TLS écrit en Rust |
-| Connexion sans mot de passe | webauthn-rs | Clés d'accès (passkeys) pour les familles et les pros |
-| Workflows durables | SDK Rust de Temporal | Version stable depuis septembre 2026. Le serveur Temporal stocke son état dans PostgreSQL. |
+| Connexion sans mot de passe | Lien magique, puis webauthn-rs | Lien par e-mail au MVP, clés d'accès (passkeys) avant le pilote (voir la [décision 0006](decisions/0006-authentification.md)) |
+| Tâches planifiées | File de tâches maison sur PostgreSQL (SQLx) | Temporal ou Restate plus tard, seulement si les besoins le justifient |
+| Dates et fuseaux horaires | jiff | Fuseaux IANA, changements d'heure traités explicitement (voir la [décision 0011](decisions/0011-dates.md)) |
+| Chiffrement applicatif | aes-gcm (RustCrypto), secrecy, zeroize | Voir la [décision 0008](decisions/0008-chiffrement-applicatif.md) |
 | Outils des agents | rmcp | SDK officiel Rust du Model Context Protocol |
 | Modèles d'IA | SDK AWS pour Rust (Amazon Bedrock), reqwest pour les API HTTP (Mistral…) | Derrière un trait commun, pour changer de fournisseur sans réécrire |
 | Média temps réel | SDK Rust de LiveKit | Réception et émission des flux audio |
@@ -257,9 +267,10 @@ sans données de santé réelles. Il serait jeté avant le pilote.
 
 | Application | Technologie | Ce qui est en Rust |
 |---|---|---|
-| **Tablette senior** | Interface Flutter, cœur Rust | Client API, synchronisation, cache SQLite chiffré, règles hors ligne |
-| **Appli famille** (iOS, Android) | Interface Flutter, cœur Rust | Idem, avec la même base de code |
-| **Portail web** (famille, pros, back-office) | Axum, Askama, htmx | Tout |
+| **Espace famille web** (MVP), installable sur le téléphone | Axum, Askama, htmx | Tout |
+| **Tablette senior** (V2) | Interface Flutter, cœur Rust | Client API, synchronisation, cache SQLite chiffré, règles hors ligne |
+| **Appli famille native** (V2, si nécessaire) | Interface Flutter, cœur Rust | Idem, avec la même base de code |
+| **Portail pros et back-office** (V2) | Axum, Askama, htmx | Tout |
 | **Application TV** (V2) | À définir | Le cœur Rust partagé |
 
 Pourquoi pas 100 % Rust pour les interfaces mobiles ? Les frameworks
@@ -274,10 +285,16 @@ interface web.
 
 ### Des images minimales et durcies
 
-- **Construction en plusieurs étapes** : compilation dans une image Rust
-  officielle (avec cargo-chef pour le cache), puis copie du seul binaire dans
-  une image d'exécution **distroless** ou `scratch` (binaire statique) :
-  pas de shell, pas de gestionnaire de paquets, presque rien à attaquer.
+- **Construction en plusieurs étapes** : compilation dans l'image Rust
+  officielle (Debian 13, avec cargo-chef pour le cache), puis copie du seul
+  binaire dans l'image **distroless `cc-debian13`** : pas de shell, pas de
+  gestionnaire de paquets, presque rien à attaquer.
+- **Images retenues pour leur faible exposition** : parmi les variantes
+  officielles, on retient la version la plus récente qui présente le moins de
+  failles connues, après analyse avec Trivy (voir la
+  [décision 0014](decisions/0014-images-docker-durcies.md)). PostgreSQL
+  utilise l'image officielle Alpine, dont on retire `gosu` et qui tourne
+  directement sous l'utilisateur `postgres`.
 - **Utilisateur non root**, système de fichiers en lecture seule, aucune
   capacité Linux superflue, profil seccomp par défaut.
 - **Images de base épinglées par empreinte** (digest), mises à jour
@@ -293,7 +310,8 @@ interface web.
 | Licences et sources autorisées | `cargo deny` |
 | Liste des dépendances embarquée dans chaque binaire | `cargo auditable` |
 | Inventaire logiciel de chaque image (SBOM) | Syft |
-| Analyse de vulnérabilités des images | Trivy |
+| Analyse de vulnérabilités des images (bloquante pour les failles hautes et critiques, et relancée chaque semaine) | Trivy |
+| Mises à jour des dépendances, images et actions | Dependabot |
 | Signature des images | Cosign |
 
 ### En développement
@@ -303,28 +321,39 @@ développeur :
 
 | Service | Image |
 |---|---|
-| `pps-api`, `pps-soin`, `pps-agents`, `pps-voix`, `pps-notif` | Nos images Rust |
-| `postgres` | PostgreSQL 18 avec pgvector |
-| `temporal` | Serveur Temporal (stockage PostgreSQL) |
-| `livekit`, `livekit-sip` | Serveur média et passerelle téléphonique |
-| `garage` | Stockage objet S3 |
-| `openbao` | Secrets et clés de chiffrement |
+| `pps-api`, puis `pps-soin`, `pps-notif`, `pps-agents`, `pps-voix` au fil des incréments | Nos images Rust |
+| `postgres` | Notre image PostgreSQL 18 durcie (pgvector ajouté quand la mémoire de l'IA arrivera) |
+| `livekit`, `livekit-sip` | Serveur média et passerelle téléphonique, quand l'agent vocal arrivera |
+| `garage` | Stockage objet S3, quand les photos et documents arriveront |
+| `openbao` | Secrets et clés de chiffrement, après le MVP (secret Docker au départ) |
+
+Chaque service n'est ajouté qu'au moment où un incrément en a besoin.
 
 ### En production
 
-- **Pilote** : Docker Compose sur des machines virtuelles chez un hébergeur
-  certifié HDS en France. Simple et suffisant pour quelques centaines de
-  familles.
-- **Montée en charge** : Kubernetes managé chez l'hébergeur HDS, avec les
-  mêmes images.
-- **PostgreSQL** : service managé certifié HDS, ou instance gérée par nos
-  soins avec réplication et sauvegardes chiffrées continues (restauration à
-  un instant donné), **testées chaque mois**.
+- **Développement, préproduction et démonstrations** : Hostinger possible,
+  avec des **données fictives uniquement** (voir la
+  [décision 0003](decisions/0003-hebergement.md)).
+- **Production** (dès la première donnée réelle d'un senior) : une **offre
+  managée chez un hébergeur certifié HDS en France**, dont le certificat
+  couvre l'exécution des conteneurs, PostgreSQL et les sauvegardes. Si PPS
+  administrait elle-même les machines virtuelles et la base, elle exercerait
+  des activités du référentiel HDS (administration, sauvegarde) et devrait
+  être certifiée elle-même ou passer par un infogérant certifié. À faire
+  valider par le juriste.
+- **PostgreSQL** : service managé certifié HDS, avec réplication et
+  sauvegardes chiffrées continues (restauration à un instant donné),
+  **testées chaque mois**.
+- **Montée en charge** : orchestration de conteneurs managée chez le même
+  hébergeur, avec les mêmes images.
 
 ## Sécurité des données dans PostgreSQL
 
-- **Row-Level Security** sur toutes les tables liées à un cercle familial,
-  en plus des contrôles dans le code Rust (défense en profondeur).
+- **Row-Level Security** activée et **forcée** sur toutes les tables liées à
+  un cercle familial, en plus des contrôles dans le code Rust (défense en
+  profondeur). Le cercle est fixé **par transaction** (`set_config(..., true)`),
+  jamais au niveau de la session, et des tests vérifient qu'un cercle ne voit
+  jamais les données d'un autre.
 - **Comptes de base séparés par service**, avec le minimum de droits :
   l'agent IA n'a **aucun accès direct** à la base, il passe par les outils de
   `pps-soin`.
@@ -345,14 +374,13 @@ pps/
 │   ├── pps-db/             # accès PostgreSQL (SQLx), migrations
 │   ├── pps-crypto/         # chiffrement applicatif
 │   ├── pps-api/            # API HTTP et portail web (Axum)
-│   ├── pps-soin/           # moteur de soin (workflows Temporal)
+│   ├── pps-soin/           # moteur de soin (file de tâches planifiées)
 │   ├── pps-agents/         # orchestrateur et agents IA (MCP)
 │   ├── pps-voix/           # agent vocal temps réel
 │   ├── pps-notif/          # SMS, push, e-mail, gazette (Typst)
 │   └── pps-coeur-mobile/   # cœur partagé des applications
 ├── apps/
-│   ├── senior/             # interface tablette (Flutter)
-│   └── famille/            # interface appli famille (Flutter)
+│   └── senior/             # interface tablette (Flutter, V2)
 ├── docker/                 # Dockerfiles des services
 ├── compose.yaml            # environnement de développement
 ├── migrations/             # schéma PostgreSQL

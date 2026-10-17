@@ -11,9 +11,6 @@ compagnon, avec un prénom et une voix qu'il a choisis.
 ```mermaid
 flowchart TD
     S["Senior<br/>(téléphone, tablette, TV, voix)"] <--> C["Compagnon<br/>(interlocuteur unique)"]
-    F["Famille et aidants<br/>(appli, résumés)"] <--> CO
-    P["Professionnels<br/>(portail, cahier de liaison)"] <--> CO
-
     C --> O{"Orchestrateur"}
     O --> SA["Agent Santé"]
     O --> CO["Agent Coordinateur famille"]
@@ -21,18 +18,30 @@ flowchart TD
     O --> SE["Agent Sentinelle"]
     O --> TU["Agent Tuteur numérique"]
     O --> BI["Agent Biographe"]
-
     M[("Mémoire personnelle<br/>chiffrée")] --- O
-    H["Validation humaine<br/>obligatoire pour toute action sensible"] -.-> O
+
+    O -- "outils typés :<br/>lire, proposer, signaler" --> MS["Moteur de soin (étage 1, sans IA)<br/>rappels, check-in, alertes,<br/>consentements, droits"]
+    H["Validation humaine<br/>pour toute action sensible"] --> MS
+    MS --> F["Famille et aidants<br/>(espace famille)"]
+    MS --> P["Professionnels<br/>(cahier de liaison)"]
 ```
+
+**Répartition des rôles** (voir la
+[décision 0002](decisions/0002-architecture-deux-etages.md)) : les rappels, le
+check-in, les cascades d'alerte et le filtrage selon les consentements sont
+**exécutés par le moteur de soin**, sans IA. Les agents ne font que **lire**
+les données que le moteur leur transmet (déjà filtrées selon les
+consentements), **proposer** (un planning, un résumé) ou **signaler** un
+événement (« le senior a dit être tombé »). C'est le moteur qui décide quoi
+faire et qui prévenir.
 
 | Agent | Rôle | Exemples | Limites strictes |
 |---|---|---|---|
 | **Compagnon** | L'interlocuteur unique du senior. Conversation naturelle, mémoire des prénoms, des goûts, de l'histoire de vie. | Appel du matin, lecture des messages de la famille, discussion sur le match d'hier. | Dit toujours qu'il est une IA. Ne se fait jamais passer pour un proche. |
-| **Santé** | Médicaments, rendez-vous, journal des symptômes, bien-être. | Rappels, escalade, fiche de préparation de consultation. | **Jamais de diagnostic, jamais de modification de traitement.** Toute ordonnance scannée est validée par un humain. |
-| **Coordinateur famille** | Synthèses, répartition des tâches, rappels de présence. | Résumé du dimanche, « Qui accompagne mamie jeudi ? ». | Ne partage que ce que le senior a autorisé. |
+| **Santé** | Aide à la conversation sur la santé : relaie les rappels décidés par le moteur de soin, tient le journal de ce que le senior dit (douleur, sommeil), prépare la fiche de consultation. | « C'est l'heure de votre comprimé du midi », fiche de préparation de consultation. | **Jamais de diagnostic, jamais de modification de traitement.** Il ne programme ni n'annule aucun rappel : il peut seulement proposer. Toute ordonnance lue est validée par un humain. |
+| **Coordinateur famille** | Rédaction des synthèses, suggestions de répartition des tâches. | Résumé du dimanche, « Qui accompagne mamie jeudi ? ». | Ne reçoit que des données déjà filtrées par le moteur de soin selon les consentements. Ne diffuse rien lui-même. |
 | **Administratif** | Lecture des courriers, aide aux démarches, échéances. | « Ce courrier de la CAF demande une réponse avant le 12. » | Prépare, n'envoie jamais rien sans validation. Aucun paiement autonome. |
-| **Sentinelle** | Sécurité : check-in quotidien, routines, anti-arnaque, alertes météo. | Cascade d'alerte si pas de « bonjour », analyse d'un SMS suspect. | Seuils et destinataires des alertes fixés par la famille et le senior. |
+| **Sentinelle** | Sécurité : analyse des messages suspects (anti-arnaque), signalement d'événements au moteur de soin. | Analyse d'un SMS suspect ; signale « le senior a dit être tombé ». | N'exécute ni check-in ni cascade : c'est le moteur de soin qui le fait, selon les seuils et destinataires choisis par le senior et sa famille. |
 | **Tuteur numérique** | Apprentissage, guidage pas à pas, lecture d'écran. | « Appuyez sur le rond vert en bas à droite. » | Ne saisit jamais un mot de passe ou un code bancaire à la place du senior. |
 | **Biographe** | Recueil de souvenirs, livre de vie, arbre généalogique. | Questions au fil des conversations, montage du livre annuel. | Le senior relit et choisit ce qui est partagé. |
 
@@ -55,9 +64,13 @@ flowchart TD
    aucun achat, ne cherche pas à maximiser le temps d'utilisation.
 6. **Respect du refus** : « Je n'ai pas envie de parler aujourd'hui » est une
    réponse valable. L'IA s'adapte, sans culpabiliser.
-7. **Escalade en cas de doute** : douleur thoracique, propos suicidaires,
-   chute, confusion inhabituelle → protocole clair (proche, téléassistance,
-   15 ou 112), défini avec des professionnels de santé.
+7. **Orientation en cas de propos alarmants** : si le senior **dit**
+   explicitement avoir mal à la poitrine, être tombé, ou tient des propos
+   suicidaires, l'IA lui conseille d'appeler le 15 ou le 112 (ou le 3114),
+   propose de prévenir un proche, et signale l'événement au moteur de soin.
+   Elle n'évalue jamais l'état clinique de la personne (ce serait une
+   fonction de dispositif médical). Le protocole est rédigé avec des
+   professionnels de santé.
 8. **Explicabilité pour la famille** : chaque alerte dit pourquoi elle a été
    déclenchée (« Pas de réponse à l'appel de 9h, ni à celui de 9h30 »).
 9. **Pas d'analyse des émotions à partir de la voix** : l'IA retient ce que
@@ -72,7 +85,7 @@ flowchart TD
 
 | Brique | Usage | Points d'attention |
 |---|---|---|
-| **Grand modèle de langage (LLM)** | Conversation, compréhension, synthèse, rédaction | Architecture multi-fournisseurs (par exemple Anthropic Claude, Mistral), hébergement ou traitement en Europe, pas d'entraînement sur les données des utilisateurs. |
+| **Grand modèle de langage (LLM)** | Conversation, compréhension, synthèse, rédaction | Architecture multi-fournisseurs (par exemple Anthropic Claude, Mistral). Aucune donnée de santé n'est envoyée à un service qui n'est pas couvert par un certificat HDS et dont le traitement ne reste pas dans l'EEE. Pas d'entraînement sur les données des utilisateurs. |
 | **Reconnaissance vocale (STT)** | Comprendre le senior | À tester sur des voix âgées : débit lent, voix tremblante, accents régionaux, appareils dentaires. Un vrai sujet de qualité. |
 | **Synthèse vocale (TTS)** | Faire parler le compagnon | Voix chaleureuse, naturelle, débit réglable, pas de voix « robot ». |
 | **Voix temps réel** | Appels téléphoniques fluides | Latence faible, gestion des interruptions et des silences longs. |
@@ -80,6 +93,15 @@ flowchart TD
 | **Vision** | Lire une ordonnance, un courrier, un écran, une boîte de médicament | Toujours avec confirmation humaine pour la santé. |
 | **Mémoire personnelle** | Se souvenir de la personne, de sa famille, de son histoire | Stockage chiffré, consultable et effaçable par le senior. |
 | **Garde-fous** | Filtrage des sujets à risque, détection d'urgence | Tests réguliers et scénarios rédigés avec des gériatres. |
+
+**Règle commune à tous les sous-traitants** (modèles d'IA, reconnaissance et
+synthèse vocales, téléphonie, SMS) : un service ne reçoit des données de santé
+que si son offre précise est couverte par un certificat HDS et que le
+traitement reste dans l'Espace économique européen. Sinon, il ne reçoit que
+des données sans caractère de santé, ou il n'est pas utilisé. Les contenus
+externes (ordonnances, courriers, SMS, messages) sont traités par les agents
+comme **non fiables** : ils peuvent contenir des instructions malveillantes
+(injection de prompt) et ne doivent jamais déclencher d'action par eux-mêmes.
 
 ## Évaluer l'IA sérieusement
 

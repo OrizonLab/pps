@@ -49,8 +49,9 @@ qu'elle crée, pas au temps passé devant un écran.*
    évoluent en douceur avec elle.
 6. **Toute la famille embarquée.** Enfants, petits-enfants, voisins,
    professionnels : chacun aide à son niveau, même 5 minutes par semaine.
-7. **Confiance absolue.** Données de santé hébergées en France, pas de
-   publicité, pas de revente de données, jamais.
+7. **Confiance absolue.** Données de santé hébergées en France chez un
+   hébergeur certifié HDS, jamais traitées hors de l'Espace économique
+   européen, pas de publicité, pas de revente de données, jamais.
 8. **Utile, pas gadget.** Chaque fonctionnalité doit retirer une inquiétude,
    une corvée ou une solitude. Sinon, on ne la fait pas.
 
