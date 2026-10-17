@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT n.nspowner::regrole::text AS \"proprietaire!\" FROM pg_namespace n WHERE n.nspname = 'app'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "proprietaire!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f9d68c327b1ed01abb1c45599181c7067797a36d39484c133e58bc44f1bcae62"
+}

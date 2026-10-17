@@ -1,0 +1,28 @@
+# Mises à jour automatiques : dépendances Rust, images Docker (épinglées par
+# empreinte) et actions GitHub (épinglées par SHA). Chaque mise à jour passe
+# par une PR, la CI et la revue.
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    # Laisser passer quelques jours : une version compromise est souvent
+    # retirée rapidement.
+    cooldown:
+      default-days: 7
+    groups:
+      dependances-rust:
+        patterns: ["*"]
+  - package-ecosystem: docker
+    directories: ["/docker", "/docker/postgres"]
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7

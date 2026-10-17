@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SET LOCAL ROLE pps_test_heritier",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "ccf3a558e0a101c37e52a9aa561103d40d2d34275185d84e4121683026ba2c71"
+}

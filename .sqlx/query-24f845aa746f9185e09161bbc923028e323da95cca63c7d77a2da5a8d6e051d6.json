@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "CREATE ROLE pps_test_heritier NOLOGIN IN ROLE pps_test_contourne",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "24f845aa746f9185e09161bbc923028e323da95cca63c7d77a2da5a8d6e051d6"
+}

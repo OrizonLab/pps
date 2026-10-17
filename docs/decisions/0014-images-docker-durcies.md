@@ -35,6 +35,10 @@ pourront être réévaluées.
   corrigeable **bloque** la fusion. Analyse relancée chaque semaine.
 - Dependabot propose les mises à jour des empreintes, des dépendances Rust et
   des actions GitHub.
+- La CI vérifie que le service PostgreSQL des tests utilise exactement la
+  même image que `docker/postgres/Dockerfile` : une PR Dependabot qui ne met à
+  jour que le Dockerfile échoue volontairement tant que `ci.yml` n'est pas
+  aligné. De même, l'image Rust se met à jour avec `rust-toolchain.toml`.
 
 ## Conséquences
 

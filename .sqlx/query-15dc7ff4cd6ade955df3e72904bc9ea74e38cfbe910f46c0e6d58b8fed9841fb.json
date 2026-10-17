@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            has_schema_privilege('pps_api', 'app', 'USAGE') AS \"usage!\",\n            has_schema_privilege('pps_api', 'app', 'CREATE') AS \"creation!\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "usage!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "creation!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "15dc7ff4cd6ade955df3e72904bc9ea74e38cfbe910f46c0e6d58b8fed9841fb"
+}

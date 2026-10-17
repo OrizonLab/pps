@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            r.rolname::text AS \"nom!\",\n            r.rolsuper AS \"superutilisateur!\",\n            r.rolbypassrls AS \"contourne_rls!\",\n            EXISTS (\n                SELECT 1 FROM pg_roles a\n                WHERE a.oid <> r.oid\n                  AND pg_has_role(r.oid, a.oid, 'MEMBER')\n                  AND (a.rolsuper OR a.rolbypassrls)\n            ) AS \"herite_privileges!\",\n            EXISTS (\n                SELECT 1 FROM pg_roles p\n                WHERE p.rolname = 'pps_proprietaire'\n                  AND pg_has_role(r.oid, p.oid, 'MEMBER')\n            ) AS \"membre_proprietaire!\"\n        FROM pg_roles r\n        WHERE r.rolname = current_user\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "nom!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "superutilisateur!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "pg_roles",
+            "name": "rolsuper"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "contourne_rls!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "pg_roles",
+            "name": "rolbypassrls"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "herite_privileges!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "membre_proprietaire!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null,
+      true,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "83414099bed272de7ff824fdeed24ae2037ce99bb425cd822bb235c67f478848"
+}

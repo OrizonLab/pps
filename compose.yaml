@@ -1,0 +1,93 @@
+# Environnement de développement local de PPS. Données fictives uniquement.
+#
+# Démarrage :
+#   ./scripts/initialiser-dev.sh   # génère des mots de passe aléatoires
+#   docker compose up --build
+#
+# Les mots de passe passent par des secrets Docker (fichiers montés dans
+# /run/secrets), jamais par des variables d'environnement.
+
+name: pps
+
+x-durcissement: &durcissement
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+
+services:
+  postgres:
+    <<: *durcissement
+    build: docker/postgres
+    image: pps-postgres:dev
+    environment:
+      POSTGRES_USER: pps_admin
+      POSTGRES_DB: pps
+      POSTGRES_PASSWORD_FILE: /run/secrets/bdd_mdp_admin
+    secrets: [bdd_mdp_admin, bdd_mdp_migration, bdd_mdp_api]
+    volumes:
+      - donnees-postgres:/var/lib/postgresql
+      - ./docker/postgres/initdb:/docker-entrypoint-initdb.d:ro
+      - ./docker/postgres/roles.sql:/opt/pps/roles.sql:ro
+    tmpfs:
+      - /var/run/postgresql
+      - /tmp
+    healthcheck:
+      # -h 127.0.0.1 : le serveur temporaire de l'initialisation n'écoute que
+      # sur le socket local et ne doit pas être déclaré prêt.
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "pps_admin", "-d", "pps"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrations:
+    <<: *durcissement
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        BINAIRE: pps-api
+    image: pps-api:dev
+    command: ["migrer"]
+    environment:
+      PPS_BDD_URL: postgres://pps_migration@postgres:5432/pps
+      PPS_BDD_MOT_DE_PASSE_FICHIER: /run/secrets/bdd_mdp_migration
+      PPS_BDD_CONNEXIONS_MAX: "1"
+    secrets: [bdd_mdp_migration]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    <<: *durcissement
+    # Image construite par le service migrations, jamais téléchargée.
+    image: pps-api:dev
+    pull_policy: never
+    command: ["serveur"]
+    environment:
+      PPS_ADRESSE: 0.0.0.0:8080
+      PPS_BDD_URL: postgres://pps_api@postgres:5432/pps
+      PPS_BDD_MOT_DE_PASSE_FICHIER: /run/secrets/bdd_mdp_api
+      PPS_FORMAT_JOURNAL: texte
+      RUST_LOG: info
+    secrets: [bdd_mdp_api]
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/service", "verifier-sante"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+
+secrets:
+  bdd_mdp_admin:
+    file: ./secrets/bdd_mdp_admin.txt
+  bdd_mdp_migration:
+    file: ./secrets/bdd_mdp_migration.txt
+  bdd_mdp_api:
+    file: ./secrets/bdd_mdp_api.txt
+
+volumes:
+  donnees-postgres:

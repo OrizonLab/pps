@@ -346,6 +346,10 @@ Chaque service n'est ajouté qu'au moment où un incrément en a besoin.
   **testées chaque mois**.
 - **Montée en charge** : orchestration de conteneurs managée chez le même
   hébergeur, avec les mêmes images.
+- **Toujours derrière un proxy inverse** (celui de l'hébergeur ou un proxy
+  dédié) qui termine le TLS et impose des délais de lecture et des limites de
+  connexions : le serveur HTTP du service n'en applique pas lui-même
+  (protection contre les connexions lentes de type *slowloris*).
 
 ## Sécurité des données dans PostgreSQL
 

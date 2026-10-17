@@ -1,0 +1,30 @@
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-indexing-slicing-in-tests = true
+allow-dbg-in-tests = true
+
+# Décision 0009 : uniquement les macros SQLx vérifiées à la compilation.
+disallowed-methods = [
+    { path = "sqlx::query", reason = "utiliser sqlx::query! (requête vérifiée à la compilation, décision 0009)" },
+    { path = "sqlx::query_as", reason = "utiliser sqlx::query_as! (décision 0009)" },
+    { path = "sqlx::query_scalar", reason = "utiliser sqlx::query_scalar! (décision 0009)" },
+    { path = "sqlx::query_with", reason = "utiliser les macros vérifiées (décision 0009)" },
+    { path = "sqlx::query_as_with", reason = "utiliser les macros vérifiées (décision 0009)" },
+    { path = "sqlx::query_scalar_with", reason = "utiliser les macros vérifiées (décision 0009)" },
+    { path = "sqlx::raw_sql", reason = "SQL non vérifié interdit (décision 0009)" },
+    { path = "sqlx::QueryBuilder::new", reason = "SQL construit dynamiquement interdit (décision 0009)" },
+    { path = "sqlx::QueryBuilder::with_arguments", reason = "SQL construit dynamiquement interdit (décision 0009)" },
+    # Méthodes du trait Executor : elles acceptent du SQL brut (y compris
+    # `AssertSqlSafe(format!(...))`). Les méthodes `.execute()`, `.fetch_one()`…
+    # des macros sont propres aux types de requête et ne sont pas concernées.
+    { path = "sqlx::Executor::execute", reason = "SQL non vérifié interdit (décision 0009)" },
+    { path = "sqlx::Executor::execute_many", reason = "SQL non vérifié interdit (décision 0009)" },
+    { path = "sqlx::Executor::fetch", reason = "SQL non vérifié interdit (décision 0009)" },
+    { path = "sqlx::Executor::fetch_many", reason = "SQL non vérifié interdit (décision 0009)" },
+    { path = "sqlx::Executor::fetch_all", reason = "SQL non vérifié interdit (décision 0009)" },
+    { path = "sqlx::Executor::fetch_one", reason = "SQL non vérifié interdit (décision 0009)" },
+    { path = "sqlx::Executor::fetch_optional", reason = "SQL non vérifié interdit (décision 0009)" },
+    { path = "sqlx::Executor::prepare", reason = "SQL non vérifié interdit (décision 0009)" },
+    { path = "sqlx::Executor::prepare_with", reason = "SQL non vérifié interdit (décision 0009)" },
+]
