@@ -119,12 +119,14 @@ flowchart TB
 
 ### Les briques open source et services recommandés
 
+Le code de PPS est écrit en **Rust**, déployé avec **Docker**, sur une base **PostgreSQL**. Le détail des choix techniques est dans le [document 6](06-architecture-technique.md).
+
 | Besoin | Option recommandée | Alternatives |
 |---|---|---|
-| **Voix temps réel et téléphonie** | [LiveKit Agents](https://github.com/livekit/agents) (Apache 2.0) : téléphonie SIP intégrée, détection de fin de parole, gestion des interruptions | [Pipecat](https://github.com/pipecat-ai/pipecat) (open source, très modulaire), ou plateformes gérées (Vapi, Retell) pour aller plus vite au prototype |
+| **Voix temps réel et téléphonie** | Serveur LiveKit et sa passerelle SIP (open source), avec notre **agent vocal en Rust** construit sur le SDK Rust de LiveKit | Framework Python LiveKit Agents, uniquement pour un prototype jetable en phase 0 |
 | **Opérateur téléphonique** | Opérateur SIP avec numéros français | — |
-| **Workflows durables** | Temporal (open source) | File de messages et planificateur maison, plus simple mais moins robuste |
-| **Orchestrateur d'agents** | Code maison léger, avec le SDK du fournisseur de modèle et MCP pour les outils | LangGraph, Pydantic AI si l'équipe préfère un cadre |
+| **Workflows durables** | Temporal, avec son **SDK Rust** (stable depuis septembre 2026) et un stockage PostgreSQL | Restate (écrit en Rust), ou une file de tâches PostgreSQL maison pour un tout premier prototype |
+| **Orchestrateur d'agents** | **Code Rust maison**, léger, avec rmcp (SDK officiel Rust de MCP) pour les outils | — |
 | **Modèle de langage** | Un modèle de premier plan accessible depuis une **région européenne** | Plusieurs fournisseurs, pour ne pas dépendre d'un seul |
 | **Reconnaissance et synthèse vocales** | Services spécialisés, choisis après un **banc d'essai sur des voix de seniors** | — |
 

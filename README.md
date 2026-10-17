@@ -31,7 +31,7 @@ un seul endroit pour coordonner, être rassuré et répartir l'aide.
 | [3. IA et agents](docs/03-ia-et-agents.md) | L'équipe d'agents IA, les règles d'or, les briques technologiques |
 | [4. Marché et modèle économique](docs/04-marche-et-modele-economique.md) | Le marché, la concurrence, les offres, les financeurs, le B2B |
 | [5. Éthique et conformité](docs/05-ethique-et-conformite.md) | Données de santé, RGPD, règlement européen sur l'IA, charte éthique, risques |
-| [6. Architecture technique](docs/06-architecture-technique.md) | Une première proposition d'architecture et de stack |
+| [6. Architecture technique](docs/06-architecture-technique.md) | Rust, Docker, PostgreSQL : les choix techniques, les services, la sécurité des données |
 | [7. Feuille de route](docs/07-feuille-de-route.md) | Le MVP recommandé, les phases, les indicateurs, les questions ouvertes |
 | [8. Faisabilité et choix de l'IA](docs/08-faisabilite-et-choix-ia.md) | Ce qui est faisable aujourd'hui, l'évaluation de Hermes Agent, l'architecture en deux étages |
 | [9. Préconfiguration et prise en main](docs/09-preconfiguration-et-prise-en-main.md) | 10 minutes pour la famille, zéro pour le senior : parcours de démarrage, tablette prête à l'emploi, profils par niveau |
@@ -50,3 +50,7 @@ Tout le reste vient enrichir ce service. Détails dans la
 ## Statut
 
 Phase de réflexion et de cadrage. Aucun code pour l'instant.
+
+Choix techniques arrêtés : **Rust** pour tout le code serveur et le cœur des
+applications, **Docker** pour le déploiement, **PostgreSQL** pour la base de
+données.
