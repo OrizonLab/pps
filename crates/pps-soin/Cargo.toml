@@ -1,0 +1,20 @@
+[package]
+name = "pps-soin"
+version = "0.1.0"
+description = "Moteur de soin de PPS (étage 1, sans IA) : cercles, membres, consentements, journal d'audit."
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+jiff.workspace = true
+pps-db.workspace = true
+pps-domaine.workspace = true
+sqlx.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+tokio.workspace = true

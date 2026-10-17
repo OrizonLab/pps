@@ -4,12 +4,23 @@
 //!   secret plutôt que dans une variable d'environnement ;
 //! - contrôle que le rôle applicatif ne contourne pas la Row-Level Security
 //!   (décision 0007) ;
-//! - migrations du schéma, exécutées uniquement par la commande `migrer`.
+//! - migrations du schéma, exécutées uniquement par la commande `migrer` ;
+//! - transactions limitées à un cercle ([`TxCercle`]) et fonctions d'accès
+//!   aux données, qui ne s'utilisent qu'à travers elles.
 
+pub mod audit;
+pub mod cercles;
 mod config;
+pub mod consentements;
+mod contexte;
+mod erreur;
+pub mod membres;
 mod role;
+pub mod utilisateurs;
 
 pub use config::{ConfigBdd, ErreurConfigBdd};
+pub use contexte::TxCercle;
+pub use erreur::{ErreurAcces, ErreurDonnees};
 pub use role::{ErreurRole, verifier_role_applicatif};
 
 use sqlx::PgPool;

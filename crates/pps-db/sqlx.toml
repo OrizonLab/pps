@@ -1,0 +1,4 @@
+# Correspondance des types pour les macros SQLx de ce crate (décision 0011) :
+# les colonnes timestamptz sont lues et écrites avec jiff.
+[macros.type-overrides]
+'TIMESTAMPTZ' = "jiff_sqlx::Timestamp"

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/pps-api", "crates/pps-db"]
+members = ["crates/pps-api", "crates/pps-db", "crates/pps-domaine", "crates/pps-soin"]
 
 [workspace.package]
 edition = "2024"
@@ -10,9 +10,12 @@ publish = false
 [workspace.dependencies]
 axum = "0.8.9"
 http-body-util = "0.1.5"
+jiff = { version = "0.2.38", features = ["tzdb-bundle-always"] }
+jiff-sqlx = { version = "0.2.0", features = ["postgres"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
-sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "tls-rustls-ring-webpki", "postgres", "macros", "migrate"] }
+sha2 = "0.11.1"
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "tls-rustls-ring-webpki", "postgres", "macros", "migrate", "uuid", "sqlx-toml"] }
 thiserror = "2.0.21"
 tokio = { version = "1.53.3", features = ["macros", "rt-multi-thread", "net", "signal", "time", "io-util"] }
 tower = { version = "0.5.3", features = ["util"] }
@@ -22,6 +25,8 @@ tracing-subscriber = { version = "0.3.23", features = ["env-filter", "fmt", "jso
 uuid = { version = "1.28.0", features = ["v7"] }
 
 pps-db = { path = "crates/pps-db" }
+pps-domaine = { path = "crates/pps-domaine" }
+pps-soin = { path = "crates/pps-soin" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

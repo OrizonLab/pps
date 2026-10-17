@@ -1,0 +1,16 @@
+[package]
+name = "pps-domaine"
+version = "0.1.0"
+description = "Règles métier de PPS, sans dépendance technique : cercle de soin, membres, consentements, journal d'audit."
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+jiff.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
