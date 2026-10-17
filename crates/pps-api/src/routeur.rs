@@ -19,7 +19,9 @@ use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::request_id::{
     MakeRequestId, PropagateRequestIdLayer, RequestId, SetRequestIdLayer,
 };
-use tower_http::sensitive_headers::SetSensitiveHeadersLayer;
+use tower_http::sensitive_headers::{
+    SetSensitiveRequestHeadersLayer, SetSensitiveResponseHeadersLayer,
+};
 use tower_http::set_header::SetResponseHeaderLayer;
 use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::{DefaultOnResponse, TraceLayer};
@@ -62,12 +64,6 @@ pub fn construire_routeur(etat: EtatApp) -> Router {
         .with_state(etat)
         .layer(
             ServiceBuilder::new()
-                // Masque ces en-têtes (requêtes et réponses) dans toute trace.
-                .layer(SetSensitiveHeadersLayer::new([
-                    header::AUTHORIZATION,
-                    header::COOKIE,
-                    header::SET_COOKIE,
-                ]))
                 // En-têtes de sécurité, y compris sur les réponses d'erreur
                 // produites par les couches internes.
                 .layer(en_tete(header::X_CONTENT_TYPE_OPTIONS, "nosniff"))
@@ -85,11 +81,19 @@ pub fn construire_routeur(etat: EtatApp) -> Router {
                 // Un identifiant reçu n'est conservé que s'il s'agit d'un UUID.
                 .layer(map_request(filtrer_id_requete))
                 .layer(SetRequestIdLayer::new(EN_TETE_ID_REQUETE, IdRequeteV7))
+                // Les en-têtes sensibles sont marqués de part et d'autre de la
+                // couche de traces : à l'entrée pour les requêtes, avant la
+                // remontée pour les réponses.
+                .layer(SetSensitiveRequestHeadersLayer::new([
+                    header::AUTHORIZATION,
+                    header::COOKIE,
+                ]))
                 .layer(
                     TraceLayer::new_for_http()
                         .make_span_with(span_requete)
                         .on_response(DefaultOnResponse::new().level(Level::INFO)),
                 )
+                .layer(SetSensitiveResponseHeadersLayer::new([header::SET_COOKIE]))
                 .layer(PropagateRequestIdLayer::new(EN_TETE_ID_REQUETE))
                 .layer(CatchPanicLayer::custom(reponse_panique))
                 // 503 plutôt que 408 : certains clients rejouent automatiquement

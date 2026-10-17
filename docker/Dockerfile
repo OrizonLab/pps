@@ -9,6 +9,8 @@
 
 # Debian 13, même glibc que l'image d'exécution. Le tag permet à Dependabot
 # de suivre la bonne variante ; l'empreinte fige l'image exacte.
+# À mettre à jour en même temps que rust-toolchain.toml (même version), sinon
+# rustup télécharge une autre toolchain pendant la construction.
 FROM rust:1.99.0-trixie@sha256:81015672d6939b0265f09adf96d5de125482bb1330106076956b0518e74edc90 AS chef
 RUN cargo install cargo-chef --locked --version 0.1.78
 WORKDIR /app
