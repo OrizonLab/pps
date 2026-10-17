@@ -24,7 +24,8 @@ vitesse de développement.
    lecture** (voir `docs/10-suivi-sante-a-distance.md`).
 3. **Aucune donnée réelle hors de la production HDS** : développement,
    préproduction, démonstrations et tests utilisent uniquement des données
-   fictives (décision 0003).
+   fictives (décision 0003). Seule exception : le banc d'essai de
+   reconnaissance vocale, dans le cadre strict de la décision 0013.
 4. **Pas de donnée de santé** dans les journaux, les traces, les messages
    d'erreur renvoyés au client, les notifications (SMS, e-mail, push), les
    noms de fichiers ou le contenu des tâches planifiées.
@@ -46,9 +47,9 @@ vitesse de développement.
   tout le code serveur et le cœur des applications. Les interfaces mobiles
   (V2) seront en Flutter, **sans logique métier** : toute règle métier reste
   en Rust.
-- **PostgreSQL 18** en Docker, en CI et en production. Le SQL doit rester
-  compatible avec PostgreSQL 16, utilisé pour les tests locaux de l'agent de
-  développement.
+- **PostgreSQL 18** en Docker et en CI ; en production, la version 18 de
+  l'offre managée de l'hébergeur HDS. Le SQL doit rester compatible avec
+  PostgreSQL 16, utilisé pour les tests locaux de l'agent de développement.
 - **Docker** : images épinglées par empreinte, distroless, non root,
   analysées par Trivy (décision 0014).
 

@@ -170,9 +170,10 @@ fermée de contacts autorisés, et la validation du comité éthique.
 - **Trois onglets, pas plus** : *Nouvelles* (photos, messages), *Agenda*
   (rendez-vous, qui fait quoi), *Comment va-t-il ?* (le résumé, les alertes).
 - **Les notifications ne contiennent jamais de donnée de santé** : un SMS ou
-  un e-mail dit seulement « Un nouveau résumé est disponible » ou « Merci de
-  vous connecter : une alerte vous attend », avec un lien vers l'espace
-  sécurisé. Le contenu reste dans l'espace authentifié, hébergé en HDS.
+  un e-mail dit seulement « Du nouveau vous attend dans votre espace PPS »,
+  avec un lien vers l'espace sécurisé. La formulation, volontairement
+  neutre (elle ne révèle même pas s'il s'agit d'une alerte), sera validée
+  dans l'analyse d'impact. Le contenu reste dans l'espace authentifié, hébergé en HDS.
 - **Un numéro d'assistance** pour la famille aussi, parce que tous les
   enfants ne sont pas à l'aise avec le numérique.
 

@@ -20,8 +20,8 @@ le déploiement, PostgreSQL sauf meilleure alternative.
 ## Conséquences
 
 - Les composants d'infrastructure éprouvés écrits dans d'autres langages
-  (PostgreSQL, LiveKit, Temporal) sont utilisés tels quels, dans des
-  conteneurs isolés.
+  (PostgreSQL, LiveKit) sont utilisés tels quels, dans des conteneurs
+  isolés.
 - La voix temps réel demande de construire nous-mêmes une partie de la
   logique conversationnelle en Rust.
 - Les interfaces mobiles utilisent Flutter, avec la logique sensible en Rust.

@@ -130,7 +130,7 @@ Le code de PPS est écrit en **Rust**, déployé avec **Docker**, sur une base *
 
 | Besoin | Option recommandée | Alternatives |
 |---|---|---|
-| **Voix temps réel et téléphonie** | Serveur LiveKit et sa passerelle SIP (open source), avec notre **agent vocal en Rust** construit sur le SDK Rust de LiveKit | Framework Python LiveKit Agents, uniquement pour un prototype jetable en phase 0 |
+| **Voix temps réel et téléphonie** | Serveur LiveKit et sa passerelle SIP (open source), avec notre **agent vocal en Rust** construit sur le SDK Rust de LiveKit | — |
 | **Opérateur téléphonique** | Opérateur SIP avec numéros français | — |
 | **Tâches planifiées durables** | **File de tâches PostgreSQL** en Rust (`FOR UPDATE SKIP LOCKED`, bail, idempotence) derrière un trait | Temporal (SDK Rust stable depuis septembre 2026) ou Restate, si les besoins dépassent la file de tâches |
 | **Orchestrateur d'agents** | **Code Rust maison**, léger, avec rmcp (SDK officiel Rust de MCP) pour les outils | — |
@@ -171,7 +171,7 @@ qu'**aucune donnée ne serve à l'entraînement** des modèles.
 
 | Risque | Comment le réduire |
 |---|---|
-| L'IA comprend mal les voix âgées | Banc d'essai dès la phase 0 avec 30 à 50 voix réelles (avec consentement), comparaison de plusieurs moteurs, possibilité de répéter, de reformuler, et de confirmer les informations importantes. |
+| L'IA comprend mal les voix âgées | Banc d'essai dès la phase 0 avec 30 à 50 voix de volontaires lisant des textes sans contenu de santé (cadre de la [décision 0013](decisions/0013-voix-temps-reel.md)), comparaison de plusieurs moteurs, possibilité de répéter, de reformuler, et de confirmer les informations importantes. |
 | Latence dans la conversation au téléphone | Pipeline en streaming, modèle rapide pour la conversation, phrases d'attente naturelles (« Je regarde… »). |
 | Une alerte ne part pas | Étage 1 sans IA, redondance, supervision 24h/24, tests automatiques quotidiens de bout en bout. |
 | L'IA invente une information médicale | L'agent Santé ne répond qu'à partir des données validées de l'étage 1, et redirige vers un professionnel pour tout le reste. |

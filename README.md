@@ -49,7 +49,8 @@ Tout le reste vient enrichir ce service. Détails dans la
 
 ## Statut
 
-Cadrage terminé, développement du MVP en cours, par incréments relus puis
+Cadrage réalisé (le choix de l'hébergeur HDS et la validation juridique
+restent à faire), développement du MVP en cours, par incréments relus puis
 fusionnés (voir la [feuille de route](docs/07-feuille-de-route.md)).
 
 Choix techniques arrêtés : **Rust** pour tout le code serveur et le cœur des

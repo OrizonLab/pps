@@ -77,6 +77,11 @@ vivent loin participent concrètement.
 
 ### Les offres (hypothèses à tester)
 
+Ces offres décrivent la **cible**, une fois les fonctionnalités de V2
+disponibles (gazette, visio, lecture d'ordonnance, tablette, téléassistance).
+Le pilote du MVP propose une seule offre, proche de « Sérénité » sans ces
+éléments (voir la [décision 0004](decisions/0004-perimetre-mvp.md)).
+
 | Offre | Prix indicatif | Contenu |
 |---|---|---|
 | **Découverte** | Gratuit | Cercle familial (fil de photos et messages, agenda partagé), rappels simples par notification. Porte d'entrée et engagement social. |

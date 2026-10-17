@@ -3,6 +3,11 @@
 - Statut : Acceptée
 - Date : 2026-10-17
 
+## Contexte
+
+Le code est écrit en grande partie par un agent IA : les erreurs de
+requête doivent être détectées le plus tôt possible, à la compilation.
+
 ## Décision
 
 SQLx 0.9, **macros vérifiées à la compilation**, cache `.sqlx/` versionné.

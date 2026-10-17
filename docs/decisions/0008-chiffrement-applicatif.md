@@ -3,6 +3,11 @@
 - Statut : Acceptée
 - Date : 2026-10-17
 
+## Contexte
+
+Une fuite de la base (sauvegarde volée, accès indu) ne doit pas révéler le
+contenu des données de santé, et l'effacement d'un cercle doit être fiable.
+
 ## Décision
 
 - **Chiffré** : le texte libre et le contenu de santé dont aucune requête n'a

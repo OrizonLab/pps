@@ -29,6 +29,9 @@ Aucune certification HDS n'a été trouvée pour Hostinger.
   téléphonie, SMS) : un service ne reçoit des données de santé que si son
   offre est couverte par un certificat HDS et que le traitement reste dans
   l'EEE.
+- **Opérateur téléphonique** : l'appel scripté (incrément 7) transporte des
+  réponses au check-in. Le juriste doit dire si un simple transport relève de
+  l'HDS ; c'est une dépendance de l'incrément 7.
 - Tout est conteneurisé : changer d'hébergeur n'a pas d'impact sur le code.
 
 ## Conséquences

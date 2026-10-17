@@ -3,6 +3,11 @@
 - Statut : Acceptée
 - Date : 2026-10-17
 
+## Contexte
+
+Le porteur, la documentation et les textes juridiques sont en français, et
+certains termes métier (aidant, personne de confiance) se traduisent mal.
+
 ## Décision
 
 **Ce que nous nommons est en français ; ce que Rust et les bibliothèques

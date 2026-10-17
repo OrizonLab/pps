@@ -3,6 +3,12 @@
 - Statut : Acceptée
 - Date : 2026-10-17
 
+## Contexte
+
+Les familles accèdent à des données de santé : l'authentification doit être
+forte sans être compliquée, et le retrait d'un accès par le senior doit
+prendre effet immédiatement.
+
 ## Décision
 
 - **Famille** : lien magique par e-mail au MVP, **clés d'accès (passkeys)**

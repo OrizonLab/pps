@@ -258,10 +258,10 @@ conversationnelle nous-mêmes.
 plusieurs semaines de travail en plus, mais cela nous donne la maîtrise
 complète du composant le plus sensible : il entend tout ce que dit le senior.
 
-**Exception possible pour la phase 0 uniquement :** pour mesurer très vite la
-qualité de compréhension des voix âgées, un prototype peut utiliser le
-framework Python de LiveKit, dans un conteneur isolé, sans accès à la base et
-sans données de santé réelles. Il serait jeté avant le pilote.
+**Mesurer avant de construire :** la qualité de compréhension des voix âgées
+est mesurée dès la phase 0 par un banc d'essai hors temps réel, en Rust
+(voir la [décision 0013](decisions/0013-voix-temps-reel.md)). Il n'y a pas
+de prototype Python.
 
 ## Les applications
 
@@ -362,7 +362,8 @@ Chaque service n'est ajouté qu'au moment où un incrément en a besoin.
 - **Journal d'audit en ajout seul**, consultable par le senior (« qui a vu
   mes données ? »).
 - **Pas de données de santé dans les journaux techniques** ni dans les traces.
-- **Sauvegardes chiffrées**, stockées dans l'UE, avec restauration testée.
+- **Sauvegardes chiffrées**, stockées en France chez l'hébergeur HDS, avec
+  restauration testée.
 
 ## Structure du dépôt envisagée
 

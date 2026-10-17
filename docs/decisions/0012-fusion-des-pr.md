@@ -3,6 +3,11 @@
 - Statut : Acceptée
 - Date : 2026-10-17
 
+## Contexte
+
+Chaque incrément est relu puis fusionné sur `main` ; l'historique doit
+rester lisible et chaque état de `main` doit passer la CI.
+
 ## Décision
 
 **Squash merge** sur `main`. Titre de la PR au format Conventional Commits ;

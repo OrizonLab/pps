@@ -27,8 +27,9 @@ pourront être réévaluées.
 
 - Image PostgreSQL dérivée : `gosu` retiré, exécution directe sous
   l'utilisateur `postgres`, jamais root.
-- Compilation Rust sur `rust:1.97.0-trixie` (même glibc que l'image
-  d'exécution).
+- Compilation Rust sur `rust:1.99.0-trixie`, la dernière version stable de
+  Rust (1er octobre 2026), même glibc que l'image d'exécution. La toolchain
+  locale est épinglée sur la même version (`rust-toolchain.toml`).
 - Toutes les images sont **épinglées par empreinte**.
 - La CI construit et analyse chaque image : une faille haute ou critique
   corrigeable **bloque** la fusion. Analyse relancée chaque semaine.

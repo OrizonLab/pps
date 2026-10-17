@@ -14,8 +14,9 @@ Chaque matin, à l'heure choisie, le compagnon appelle le senior :
 2. Il rappelle les médicaments et les rendez-vous du jour.
 3. Il lit les messages et décrit les photos envoyées par la famille.
 4. Il recueille ce que le senior veut transmettre (« Dis à Sophie que… »).
-5. Il envoie un court résumé à la famille, et une alerte si quelque chose ne
-   va pas.
+5. Le moteur de soin met à jour le résumé pour la famille et, si le senior ne
+   répond pas ou signale un problème, déclenche la cascade d'alerte vers les
+   proches qu'il a autorisés.
 
 Pourquoi c'est la bonne porte d'entrée :
 
@@ -167,5 +168,5 @@ porteur du projet.
 2. Trancher les questions ouvertes 1 à 3.
 3. Rédiger le guide d'entretien et lancer les premières interviews de familles.
 4. Monter le test « magicien d'Oz » de l'appel du matin avec 5 à 10 familles.
-5. En parallèle, prototyper techniquement l'appel vocal IA en français, pour
-   mesurer la qualité de compréhension sur des voix âgées.
+5. En parallèle, monter le banc d'essai de reconnaissance vocale (décision
+   0013), pour mesurer la qualité de compréhension sur des voix âgées.
