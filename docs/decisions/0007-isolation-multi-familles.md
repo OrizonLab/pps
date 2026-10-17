@@ -47,12 +47,16 @@ Certaines lectures ont lieu **avant** de connaître le cercle, ou portent sur
 chacune aura une politique dédiée, documentée et testée :
 
 - **sessions** : retrouver la session à partir du jeton haché, avant de
-  connaître le cercle (politique fondée sur l'utilisateur, pas sur le cercle) ;
+  connaître l'utilisateur et le cercle. Cette recherche passe par une
+  fonction `SECURITY DEFINER` réduite à ce seul usage (entrée : empreinte du
+  jeton ; sortie : utilisateur et expiration), plutôt que par un accès
+  direct à la table ;
 - **appartenance aux cercles** : vérifier qu'un utilisateur est membre d'un
   cercle avant d'ouvrir la transaction de ce cercle ;
-- **tâches planifiées** : le planificateur réserve des tâches de tous les
-  cercles, avec un **rôle dédié** (`pps_soin`) limité à cette table, puis
-  exécute chaque tâche dans la transaction de son cercle.
+- **tâches planifiées** : la réservation des tâches de tous les cercles se
+  fait avec un **rôle dédié** (`pps_planificateur`), limité à la table des
+  tâches. L'exécution de chaque tâche se fait ensuite avec le rôle habituel
+  du service, dans la transaction du cercle concerné.
 
 Le test « toute table a la RLS activée et forcée » reste valable : ces tables
 ont aussi la RLS, avec leurs propres politiques. Le journal d'audit est
