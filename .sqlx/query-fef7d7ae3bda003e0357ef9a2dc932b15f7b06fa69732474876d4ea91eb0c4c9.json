@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SET LOCAL ROLE pps_api",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "fef7d7ae3bda003e0357ef9a2dc932b15f7b06fa69732474876d4ea91eb0c4c9"
+}

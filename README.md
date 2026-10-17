@@ -47,6 +47,21 @@ aucun apprentissage, une valeur immédiate pour le senior comme pour l'aidant.
 Tout le reste vient enrichir ce service. Détails dans la
 [feuille de route](docs/07-feuille-de-route.md).
 
+## Développement
+
+Prérequis : Docker (avec Compose) et, pour travailler hors conteneur, la
+toolchain Rust épinglée dans `rust-toolchain.toml`.
+
+```sh
+./scripts/initialiser-dev.sh   # génère des mots de passe de développement aléatoires
+docker compose up --build      # PostgreSQL durci, migrations, puis service API
+curl http://127.0.0.1:8080/sante/pret
+```
+
+Les règles d'ingénierie et les commandes de vérification (formatage, Clippy,
+tests, dépendances) sont dans [`CLAUDE.md`](CLAUDE.md). Uniquement des
+données fictives en développement.
+
 ## Statut
 
 Cadrage réalisé (le choix de l'hébergeur HDS et la validation juridique

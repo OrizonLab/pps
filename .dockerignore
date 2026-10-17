@@ -1,0 +1,9 @@
+target
+.git
+.github
+docs
+*.md
+!crates/**/*.md
+.env
+.env.*
+secrets

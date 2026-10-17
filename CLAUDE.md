@@ -120,6 +120,7 @@ cargo clippy --workspace --all-targets -- -D warnings   # lints
 cargo test --workspace                                  # tests (DATABASE_URL requis pour l'intégration)
 cargo deny check                                        # dépendances : failles, licences, sources
 cargo sqlx prepare --workspace                          # mise à jour du cache des requêtes
+./scripts/initialiser-dev.sh                            # secrets de développement (une fois)
 docker compose up --build                               # environnement complet
 ```
 
