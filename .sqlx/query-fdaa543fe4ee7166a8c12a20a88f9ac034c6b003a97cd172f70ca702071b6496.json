@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "CREATE FUNCTION app.essai_droits() RETURNS integer LANGUAGE sql RETURN 1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "fdaa543fe4ee7166a8c12a20a88f9ac034c6b003a97cd172f70ca702071b6496"
+}

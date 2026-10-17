@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "CREATE TABLE app.essai_droits (id integer PRIMARY KEY)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "ad4a1ef122d2e007e688103a00464a8d98a9795d302c1751f8eee04789f2ac39"
+}

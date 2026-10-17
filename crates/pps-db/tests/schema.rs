@@ -60,6 +60,121 @@ async fn le_role_applicatif_est_accepte(bdd: PgPool) {
     transaction.rollback().await.unwrap();
 }
 
+#[sqlx::test(migrator = "MIGRATIONS")]
+async fn un_role_membre_du_proprietaire_est_refuse(bdd: PgPool) {
+    let mut transaction = bdd.begin().await.unwrap();
+    sqlx::query!("SET LOCAL ROLE pps_migration")
+        .execute(&mut *transaction)
+        .await
+        .unwrap();
+    let erreur = verifier_role_applicatif(&mut *transaction)
+        .await
+        .unwrap_err();
+    assert!(matches!(erreur, ErreurRole::ProprietaireDesDonnees(_)));
+}
+
+#[sqlx::test(migrator = "MIGRATIONS")]
+async fn un_role_bypassrls_direct_ou_herite_est_refuse(bdd: PgPool) {
+    // Les rôles créés dans la transaction disparaissent à son annulation.
+    let mut transaction = bdd.begin().await.unwrap();
+    sqlx::query!("CREATE ROLE pps_test_contourne NOLOGIN BYPASSRLS")
+        .execute(&mut *transaction)
+        .await
+        .unwrap();
+    sqlx::query!("CREATE ROLE pps_test_heritier NOLOGIN IN ROLE pps_test_contourne")
+        .execute(&mut *transaction)
+        .await
+        .unwrap();
+
+    sqlx::query!("SET LOCAL ROLE pps_test_contourne")
+        .execute(&mut *transaction)
+        .await
+        .unwrap();
+    let erreur = verifier_role_applicatif(&mut *transaction)
+        .await
+        .unwrap_err();
+    assert!(matches!(erreur, ErreurRole::ContourneRls(_)));
+
+    sqlx::query!("RESET ROLE")
+        .execute(&mut *transaction)
+        .await
+        .unwrap();
+    sqlx::query!("SET LOCAL ROLE pps_test_heritier")
+        .execute(&mut *transaction)
+        .await
+        .unwrap();
+    let erreur = verifier_role_applicatif(&mut *transaction)
+        .await
+        .unwrap_err();
+    assert!(matches!(erreur, ErreurRole::HeritePrivileges(_)));
+    transaction.rollback().await.unwrap();
+}
+
+/// Aucun droit n'est accordé par défaut sur les nouveaux objets du
+/// propriétaire : ni au rôle applicatif, ni à PUBLIC (fonctions comprises).
+#[sqlx::test(migrator = "MIGRATIONS")]
+async fn aucun_droit_par_defaut_sur_les_nouveaux_objets(bdd: PgPool) {
+    let mut transaction = bdd.begin().await.unwrap();
+    sqlx::query!("SET LOCAL ROLE pps_proprietaire")
+        .execute(&mut *transaction)
+        .await
+        .unwrap();
+    sqlx::query!("CREATE TABLE app.essai_droits (id integer PRIMARY KEY)")
+        .execute(&mut *transaction)
+        .await
+        .unwrap();
+    sqlx::query!("CREATE FUNCTION app.essai_droits() RETURNS integer LANGUAGE sql RETURN 1")
+        .execute(&mut *transaction)
+        .await
+        .unwrap();
+
+    let droits = sqlx::query!(
+        r#"
+        SELECT
+            has_table_privilege('pps_api', 'app.essai_droits', 'SELECT, INSERT, UPDATE, DELETE')
+                AS "table_api!",
+            has_function_privilege('pps_api', 'app.essai_droits()', 'EXECUTE') AS "fonction_api!",
+            has_function_privilege('public', 'app.essai_droits()', 'EXECUTE') AS "fonction_public!"
+        "#
+    )
+    .fetch_one(&mut *transaction)
+    .await
+    .unwrap();
+    assert!(
+        !droits.table_api,
+        "le rôle applicatif ne doit avoir aucun droit par défaut"
+    );
+    assert!(
+        !droits.fonction_api,
+        "pps_api ne doit pas exécuter une fonction par défaut"
+    );
+    assert!(
+        !droits.fonction_public,
+        "PUBLIC ne doit pas exécuter une fonction par défaut"
+    );
+    transaction.rollback().await.unwrap();
+}
+
+/// Tous les objets du schéma applicatif appartiennent au propriétaire.
+#[sqlx::test(migrator = "MIGRATIONS")]
+async fn tout_objet_applicatif_appartient_au_proprietaire(bdd: PgPool) {
+    let etrangers = sqlx::query_scalar!(
+        r#"
+        SELECT c.relname::text AS "objet!"
+        FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE n.nspname = 'app' AND c.relowner::regrole::text <> 'pps_proprietaire'
+        UNION ALL
+        SELECT p.proname::text
+        FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname = 'app' AND p.proowner::regrole::text <> 'pps_proprietaire'
+        "#
+    )
+    .fetch_all(&bdd)
+    .await
+    .unwrap();
+    assert!(etrangers.is_empty(), "objets mal possédés : {etrangers:?}");
+}
+
 /// Convention de la migration 0001 : chaque migration fixe le rôle
 /// propriétaire et le rétablit à la fin.
 #[test]

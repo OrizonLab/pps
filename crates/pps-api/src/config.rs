@@ -84,6 +84,6 @@ mod tests {
         })
         .unwrap();
         assert_eq!(config.adresse, ADRESSE_PAR_DEFAUT);
-        assert_eq!(config.bdd.options().get_username(), "pps_api");
+        assert_eq!(config.bdd.utilisateur(), "pps_api");
     }
 }

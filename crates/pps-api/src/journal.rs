@@ -18,7 +18,9 @@ pub fn initialiser() {
     let texte = std::env::var(VAR_FORMAT).is_ok_and(|v| v == "texte");
     let registre = tracing_subscriber::registry().with(filtre);
     let resultat = if texte {
-        registre.with(tracing_subscriber::fmt::layer()).try_init()
+        registre
+            .with(tracing_subscriber::fmt::layer().with_ansi(false))
+            .try_init()
     } else {
         registre
             .with(

@@ -81,9 +81,15 @@ impl ConfigBdd {
         })
     }
 
-    /// Options de connexion `SQLx`.
-    pub fn options(&self) -> &PgConnectOptions {
+    /// Options de connexion `SQLx`. Interne au crate : leur affichage de
+    /// débogage contient le mot de passe.
+    pub(crate) fn options(&self) -> &PgConnectOptions {
         &self.options
+    }
+
+    /// Rôle de connexion (pour les journaux et les diagnostics).
+    pub fn utilisateur(&self) -> &str {
+        self.options.get_username()
     }
 
     /// Nombre maximal de connexions du pool.
@@ -198,6 +204,14 @@ mod tests {
         let debogage = format!("{config:?}");
         assert!(!debogage.contains("SecretTresSensible"));
         assert!(debogage.contains("pps_api"));
+    }
+
+    #[test]
+    fn fin_de_ligne_windows_retiree_du_mot_de_passe() {
+        let chemin = fichier_temporaire("crlf", "MotDePasse\r\n");
+        let mot_de_passe = lire_mot_de_passe(&chemin).unwrap();
+        std::fs::remove_file(&chemin).unwrap();
+        assert_eq!(mot_de_passe, "MotDePasse");
     }
 
     #[test]

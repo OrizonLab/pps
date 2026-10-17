@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "CREATE ROLE pps_test_contourne NOLOGIN BYPASSRLS",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "be0aa460585719f8882881e723071bf535cab8584509316859efc309169b33cf"
+}

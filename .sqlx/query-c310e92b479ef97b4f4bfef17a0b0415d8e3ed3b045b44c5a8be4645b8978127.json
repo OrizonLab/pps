@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SET LOCAL ROLE pps_proprietaire",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "c310e92b479ef97b4f4bfef17a0b0415d8e3ed3b045b44c5a8be4645b8978127"
+}

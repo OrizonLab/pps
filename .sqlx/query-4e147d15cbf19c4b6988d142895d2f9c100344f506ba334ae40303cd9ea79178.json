@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SET LOCAL ROLE pps_test_contourne",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "4e147d15cbf19c4b6988d142895d2f9c100344f506ba334ae40303cd9ea79178"
+}

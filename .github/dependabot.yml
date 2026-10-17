@@ -7,6 +7,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Laisser passer quelques jours : une version compromise est souvent
+    # retirée rapidement.
+    cooldown:
+      default-days: 7
     groups:
       dependances-rust:
         patterns: ["*"]
@@ -14,7 +18,11 @@ updates:
     directories: ["/docker", "/docker/postgres"]
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7

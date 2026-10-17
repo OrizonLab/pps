@@ -32,7 +32,9 @@ services:
       - /var/run/postgresql
       - /tmp
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "pps_admin", "-d", "pps"]
+      # -h 127.0.0.1 : le serveur temporaire de l'initialisation n'écoute que
+      # sur le socket local et ne doit pas être déclaré prêt.
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "pps_admin", "-d", "pps"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -57,7 +59,9 @@ services:
 
   api:
     <<: *durcissement
+    # Image construite par le service migrations, jamais téléchargée.
     image: pps-api:dev
+    pull_policy: never
     command: ["serveur"]
     environment:
       PPS_ADRESSE: 0.0.0.0:8080

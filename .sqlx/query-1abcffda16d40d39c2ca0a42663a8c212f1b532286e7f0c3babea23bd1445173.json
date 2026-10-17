@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT c.relname::text AS \"objet!\"\n        FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace\n        WHERE n.nspname = 'app' AND c.relowner::regrole::text <> 'pps_proprietaire'\n        UNION ALL\n        SELECT p.proname::text\n        FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace\n        WHERE n.nspname = 'app' AND p.proowner::regrole::text <> 'pps_proprietaire'\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "objet!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "1abcffda16d40d39c2ca0a42663a8c212f1b532286e7f0c3babea23bd1445173"
+}

@@ -9,6 +9,7 @@ use axum::Router;
 use axum::body::Body;
 use axum::extract::MatchedPath;
 use axum::http::{HeaderName, HeaderValue, Request, StatusCode, header};
+use axum::middleware::map_request;
 use axum::response::{IntoResponse, Response};
 use serde::Serialize;
 use sqlx::PgPool;
@@ -18,10 +19,11 @@ use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::request_id::{
     MakeRequestId, PropagateRequestIdLayer, RequestId, SetRequestIdLayer,
 };
-use tower_http::sensitive_headers::SetSensitiveRequestHeadersLayer;
+use tower_http::sensitive_headers::SetSensitiveHeadersLayer;
 use tower_http::set_header::SetResponseHeaderLayer;
 use tower_http::timeout::TimeoutLayer;
-use tower_http::trace::TraceLayer;
+use tower_http::trace::{DefaultOnResponse, TraceLayer};
+use tracing::Level;
 use uuid::Uuid;
 
 use crate::sante;
@@ -60,10 +62,11 @@ pub fn construire_routeur(etat: EtatApp) -> Router {
         .with_state(etat)
         .layer(
             ServiceBuilder::new()
-                // Masque ces en-têtes dans toute trace éventuelle.
-                .layer(SetSensitiveRequestHeadersLayer::new([
+                // Masque ces en-têtes (requêtes et réponses) dans toute trace.
+                .layer(SetSensitiveHeadersLayer::new([
                     header::AUTHORIZATION,
                     header::COOKIE,
+                    header::SET_COOKIE,
                 ]))
                 // En-têtes de sécurité, y compris sur les réponses d'erreur
                 // produites par les couches internes.
@@ -79,12 +82,21 @@ pub fn construire_routeur(etat: EtatApp) -> Router {
                     "max-age=63072000; includeSubDomains",
                 ))
                 .layer(en_tete(header::CACHE_CONTROL, "no-store"))
+                // Un identifiant reçu n'est conservé que s'il s'agit d'un UUID.
+                .layer(map_request(filtrer_id_requete))
                 .layer(SetRequestIdLayer::new(EN_TETE_ID_REQUETE, IdRequeteV7))
-                .layer(TraceLayer::new_for_http().make_span_with(span_requete))
+                .layer(
+                    TraceLayer::new_for_http()
+                        .make_span_with(span_requete)
+                        .on_response(DefaultOnResponse::new().level(Level::INFO)),
+                )
                 .layer(PropagateRequestIdLayer::new(EN_TETE_ID_REQUETE))
                 .layer(CatchPanicLayer::custom(reponse_panique))
+                // 503 plutôt que 408 : certains clients rejouent automatiquement
+                // une requête après un 408, ce qui serait dangereux pour une
+                // écriture non idempotente.
                 .layer(TimeoutLayer::with_status_code(
-                    StatusCode::REQUEST_TIMEOUT,
+                    StatusCode::SERVICE_UNAVAILABLE,
                     DELAI_MAX_REQUETE,
                 ))
                 .layer(RequestBodyLimitLayer::new(TAILLE_MAX_CORPS)),
@@ -113,6 +125,23 @@ fn span_requete(requete: &Request<Body>) -> tracing::Span {
         route,
         id_requete,
     )
+}
+
+/// Retire un identifiant de requête reçu qui n'est pas un UUID (taille ou
+/// contenu arbitraires) : un nouvel identifiant sera alors généré.
+async fn filtrer_id_requete(mut requete: Request<Body>) -> Request<Body> {
+    let valide = requete
+        .headers()
+        .get(&EN_TETE_ID_REQUETE)
+        .is_none_or(|valeur| {
+            valeur
+                .to_str()
+                .is_ok_and(|texte| Uuid::try_parse(texte).is_ok())
+        });
+    if !valide {
+        requete.headers_mut().remove(&EN_TETE_ID_REQUETE);
+    }
+    requete
 }
 
 async fn introuvable() -> Response {

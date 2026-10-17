@@ -55,13 +55,25 @@ async fn vivant_repond_avec_les_en_tetes_de_securite(bdd: PgPool) {
 }
 
 #[sqlx::test(migrator = "pps_db::MIGRATIONS")]
-async fn l_identifiant_de_requete_recu_est_propage(bdd: PgPool) {
+async fn un_identifiant_de_requete_uuid_recu_est_propage(bdd: PgPool) {
+    let id_amont = "0192f0e0-1234-7abc-8def-0123456789ab";
     let requete = Request::get("/sante/vivant")
-        .header("x-request-id", "id-amont-123")
+        .header("x-request-id", id_amont)
         .body(Body::empty())
         .unwrap();
     let (_, en_tetes, _) = appeler(bdd, requete).await;
-    assert_eq!(en_tetes["x-request-id"], "id-amont-123");
+    assert_eq!(en_tetes["x-request-id"], id_amont);
+}
+
+#[sqlx::test(migrator = "pps_db::MIGRATIONS")]
+async fn un_identifiant_de_requete_arbitraire_est_remplace(bdd: PgPool) {
+    let requete = Request::get("/sante/vivant")
+        .header("x-request-id", "x".repeat(8000))
+        .body(Body::empty())
+        .unwrap();
+    let (_, en_tetes, _) = appeler(bdd, requete).await;
+    let id = en_tetes["x-request-id"].to_str().unwrap();
+    assert_eq!(uuid::Uuid::parse_str(id).unwrap().get_version_num(), 7);
 }
 
 #[sqlx::test(migrator = "pps_db::MIGRATIONS")]
