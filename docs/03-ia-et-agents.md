@@ -60,6 +60,13 @@ flowchart TD
    15 ou 112), défini avec des professionnels de santé.
 8. **Explicabilité pour la famille** : chaque alerte dit pourquoi elle a été
    déclenchée (« Pas de réponse à l'appel de 9h, ni à celui de 9h30 »).
+9. **Pas d'analyse des émotions à partir de la voix** : l'IA retient ce que
+   le senior **dit** (« je suis fatiguée »), jamais une émotion déduite du ton
+   de sa voix. C'est plus respectueux, et la reconnaissance des émotions est
+   classée « à haut risque » par le règlement européen sur l'IA.
+10. **Ni terminal, ni auto-modification** : les agents n'appellent que des
+    outils typés et limités, et leurs instructions sont versionnées et
+    testées comme du code (voir le [document 8](08-faisabilite-et-choix-ia.md)).
 
 ## Les briques technologiques
 

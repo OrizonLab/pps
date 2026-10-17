@@ -147,8 +147,9 @@ par le canal qu'il connaît déjà.
 - **Détection de signaux faibles** : changements dans la voix, le vocabulaire,
   le rythme de vie ou le sommeil, qui peuvent justifier une consultation. Ce
   n'est **jamais un diagnostic** : seulement une invitation à en parler à un
-  professionnel. Nécessite un partenariat clinique et probablement une
-  certification de dispositif médical. V3
+  professionnel. Nécessite un partenariat clinique, une certification de
+  dispositif médical, et relève des IA « à haut risque » (analyse de la voix).
+  V3. Voir le [document 10](10-suivi-sante-a-distance.md).
 
 ---
 

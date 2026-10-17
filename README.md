@@ -33,6 +33,9 @@ un seul endroit pour coordonner, être rassuré et répartir l'aide.
 | [5. Éthique et conformité](docs/05-ethique-et-conformite.md) | Données de santé, RGPD, règlement européen sur l'IA, charte éthique, risques |
 | [6. Architecture technique](docs/06-architecture-technique.md) | Une première proposition d'architecture et de stack |
 | [7. Feuille de route](docs/07-feuille-de-route.md) | Le MVP recommandé, les phases, les indicateurs, les questions ouvertes |
+| [8. Faisabilité et choix de l'IA](docs/08-faisabilite-et-choix-ia.md) | Ce qui est faisable aujourd'hui, l'évaluation de Hermes Agent, l'architecture en deux étages |
+| [9. Préconfiguration et prise en main](docs/09-preconfiguration-et-prise-en-main.md) | 10 minutes pour la famille, zéro pour le senior : parcours de démarrage, tablette prête à l'emploi, profils par niveau |
+| [10. Suivi de santé à distance](docs/10-suivi-sante-a-distance.md) | Ce que les proches peuvent légalement voir, et comment : consentement, secret médical, objets connectés, télésurveillance |
 
 ## En bref : par où commencer ?
 

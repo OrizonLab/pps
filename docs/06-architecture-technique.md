@@ -3,6 +3,11 @@
 Une proposition de départ pour cadrer les choix. Elle sera revue une fois le
 MVP précisé et l'équipe constituée.
 
+> Le principe des **deux étages** (un moteur de soin sans IA, infaillible,
+> et des agents IA qui proposent sans jamais décider seuls) et le choix de
+> l'orchestrateur sont détaillés dans le
+> [document 8](08-faisabilite-et-choix-ia.md).
+
 ## Vue d'ensemble
 
 ```mermaid
@@ -58,9 +63,11 @@ flowchart LR
 | **Web** (famille, portail pros, back-office) | Next.js (TypeScript) | Rapide à développer, bon référencement pour le site public. |
 | **Back-end métier** | TypeScript (NestJS) ou Python (FastAPI) | Python facilite le travail sur l'IA ; TypeScript permet de partager le code avec le front. À trancher selon l'équipe. |
 | **Base de données** | PostgreSQL | Fiable, éprouvée, chiffrement possible au niveau des colonnes sensibles. |
-| **Tâches planifiées et alertes** | File de messages et planificateur (Temporal ou équivalent) | Les rappels et escalades doivent être fiables à la minute près, avec reprise en cas de panne. |
-| **Voix temps réel** | Pipeline STT → LLM → TTS en streaming, ou API vocale temps réel | Latence faible indispensable pour une conversation naturelle au téléphone. |
-| **Téléphonie** | Plateforme de téléphonie programmable avec numéros français | Appels sortants planifiés, appels entrants, enregistrement consenti. |
+| **Tâches planifiées et alertes** | Moteur de workflows durables (Temporal) | Les rappels et escalades doivent être fiables à la minute près, avec reprise en cas de panne. |
+| **Voix temps réel** | LiveKit Agents (ou Pipecat) : pipeline STT → LLM → TTS en streaming | Latence faible, gestion des interruptions et de la fin de parole, indispensables au téléphone. |
+| **Téléphonie** | Opérateur SIP avec numéros français, raccordé au framework voix | Appels sortants planifiés, appels entrants, enregistrement consenti. |
+| **Orchestrateur d'agents** | Code maison léger, outils exposés via MCP | Contrôle total des outils accessibles à chaque agent, pas d'auto-modification. |
+| **Gestion des tablettes** | Android Management API (enrôlement sans contact, mode dédié), Apple Business Manager et MDM pour les iPad | Tablettes livrées prêtes à l'emploi et gérables à distance. |
 | **Hébergement** | Hébergeur certifié HDS en France | Obligatoire dès qu'on héberge des données de santé. |
 | **Observabilité** | Journaux, métriques, alertes techniques | Une alerte manquée peut avoir des conséquences graves : la supervision est critique. |
 
