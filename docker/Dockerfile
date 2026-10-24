@@ -29,7 +29,7 @@ RUN cargo build --release --locked --bin "${BINAIRE}" \
     && cp "target/release/${BINAIRE}" /app/service
 
 # Aucune faille haute ou critique connue au 2026-10-17.
-FROM gcr.io/distroless/cc-debian13:nonroot@sha256:e792ab3d241a468a4fd7519ddbbebe66b49b5f365771716ea688ad40b6c6f1c2
+FROM gcr.io/distroless/cc-debian13:nonroot@sha256:3ee00291cf386ec52a552e6a858d555debd74776eb4bfa53fa3df2cd6677515e
 COPY --from=compilation /app/service /usr/local/bin/service
 USER nonroot:nonroot
 ENTRYPOINT ["/usr/local/bin/service"]
